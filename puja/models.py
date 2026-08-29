@@ -50,6 +50,7 @@ class Donation(models.Model):
     received_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
 
     receipt_file = models.FileField(upload_to='donations/', blank=True, null=True)
+    material_description = models.CharField(max_length=255, blank=True, null=True, help_text="e.g. 50kg Rice, 20kg Potato")
 
     def save(self, *args, **kwargs):
         if not self.receipt_number:
@@ -249,3 +250,9 @@ class GalleryMedia(models.Model):
 
     def __str__(self):
         return f"Media in {self.album.title}"
+
+class PujaConfiguration(models.Model):
+    previous_year_balance = models.DecimalField(max_digits=12, decimal_places=2, default=0.00, blank=True, null=True, verbose_name="Previous Year Carry Forward Balance")
+
+    def __str__(self):
+        return f"Puja Settings (Prev Year Balance: Rs. {self.previous_year_balance})"

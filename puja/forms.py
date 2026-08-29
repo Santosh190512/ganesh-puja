@@ -28,20 +28,22 @@ class UserProfileForm(forms.ModelForm):
 class DonationForm(forms.ModelForm):
     class Meta:
         model = Donation
-        fields = ('donor_name', 'donor_mobile', 'amount', 'payment_method', 'transaction_id', 'is_anonymous', 'receipt_file')
+        fields = ('donor_name', 'donor_mobile', 'amount', 'payment_method', 'transaction_id', 'is_anonymous', 'receipt_file', 'material_description')
         widgets = {
             'donor_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Donor Name'}),
             'donor_mobile': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Donor Mobile'}),
-            'amount': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Amount in Rs.'}),
+            'amount': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Amount in Rs. (Optional for material donations)'}),
             'payment_method': forms.Select(attrs={'class': 'form-control'}),
             'transaction_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Transaction ID (Optional)'}),
             'is_anonymous': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'receipt_file': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': 'image/*', 'capture': 'environment'}),
+            'material_description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 50kg Rice, 20kg Potato (For In-Kind donations)'}),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['amount'].required = False
+        self.fields['material_description'].required = False
 
 class ExpenseForm(forms.ModelForm):
     class Meta:

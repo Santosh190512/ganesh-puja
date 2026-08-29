@@ -39,7 +39,14 @@
                         {% endif %}
                     </td>
                     <td>{{ donation.donor_mobile|default:"-" }}</td>
-                    <td class="fw-bold text-success">Rs. {{ donation.amount }}</td>
+                    <td class="fw-bold text-success">
+                        {% if donation.amount > 0 %}
+                            Rs. {{ donation.amount }}
+                        {% endif %}
+                        {% if donation.material_description %}
+                            <div class="small text-secondary fw-normal"><i class="fa-solid fa-box-open me-1"></i> {{ donation.material_description }}</div>
+                        {% endif %}
+                    </td>
                     <td><span class="badge bg-info text-dark">{{ donation.get_payment_method_display }}</span></td>
                     <td>{{ donation.transaction_id|default:"-" }}</td>
                     <td>{{ donation.date_received|date:"d M Y H:i" }}</td>

@@ -13,19 +13,37 @@
 <div class="card p-4 mb-4 border-start border-4 border-warning">
     <h4 class="fw-bold mb-3 text-dark">Final Income-Expense Statement</h4>
     <div class="row text-center g-3">
+        {% if prev_year_balance > 0 %}
+        <div class="col-md-3">
+            <div class="bg-light p-3 rounded">
+                <span class="text-muted small uppercase">Prev. Year Balance</span>
+                <h3 class="text-primary fw-bold mt-1">Rs. {{ prev_year_balance }}</h3>
+            </div>
+        </div>
+        <div class="col-md-3">
+        {% else %}
         <div class="col-md-4">
+        {% endif %}
             <div class="bg-light p-3 rounded">
                 <span class="text-muted small uppercase">Total Donations</span>
                 <h3 class="text-success fw-bold mt-1">Rs. {{ total_donations }}</h3>
             </div>
         </div>
+        {% if prev_year_balance > 0 %}
+        <div class="col-md-3">
+        {% else %}
         <div class="col-md-4">
+        {% endif %}
             <div class="bg-light p-3 rounded">
                 <span class="text-muted small uppercase">Total Expenses</span>
                 <h3 class="text-danger fw-bold mt-1">Rs. {{ total_expenses }}</h3>
             </div>
         </div>
+        {% if prev_year_balance > 0 %}
+        <div class="col-md-3">
+        {% else %}
         <div class="col-md-4">
+        {% endif %}
             <div class="bg-light p-3 rounded">
                 <span class="text-muted small uppercase">Net Profit/Balance</span>
                 <h3 class="{% if net_balance >= 0 %}text-success{% else %}text-danger{% endif %} fw-bold mt-1">Rs. {{ net_balance }}</h3>

@@ -12,6 +12,9 @@
                 <div>
                     <h6 class="text-uppercase small mb-1">Total Budget</h6>
                     <h4 class="mb-0">Rs. {{ net_budget }}</h4>
+                    {% if prev_year_balance > 0 %}
+                        <div style="font-size: 0.75rem;" class="opacity-75 mt-1"><i class="fa-solid fa-clock-rotate-left me-1"></i>Incl. Rs. {{ prev_year_balance }} prev.</div>
+                    {% endif %}
                 </div>
                 <i class="fa-solid fa-wallet fa-2x opacity-50"></i>
             </div>

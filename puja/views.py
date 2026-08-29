@@ -7,7 +7,7 @@ from django.utils import timezone
 from .models import (CustomUser, VolunteerTeam, Donation, Expense, VolunteerDuty, 
                      Attendance, PujaEvent, Vendor, Quotation, VendorPayment, 
                      InventoryItem, StockTransaction, PrasadPlanner, Announcement, 
-                     GalleryAlbum, GalleryMedia)
+                     GalleryAlbum, GalleryMedia, PujaConfiguration)
 from .forms import (CustomUserCreationForm, UserProfileForm, DonationForm, ExpenseForm, 
                     VolunteerTeamForm, DutyAssignmentForm, EventForm, InventoryItemForm, 
                     StockTransactionForm, VendorForm, QuotationForm, VendorPaymentForm, 
@@ -64,9 +64,12 @@ def profile_view(request):
 
 @login_required
 def dashboard_view(request):
+    config = PujaConfiguration.objects.first()
+    prev_year_balance = config.previous_year_balance if config and config.previous_year_balance else 0.00
+
     total_donations = Donation.objects.aggregate(total=Sum('amount'))['total'] or 0
     total_expenses = Expense.objects.aggregate(total=Sum('amount'))['total'] or 0
-    net_budget = total_donations - total_expenses
+    net_budget = prev_year_balance + total_donations - total_expenses
 
     pending_tasks_count = VolunteerDuty.objects.filter(status='PENDING').count()
     volunteers_count = CustomUser.objects.filter(role='NORMAL_VOLUNTEER').count()
@@ -85,6 +88,7 @@ def dashboard_view(request):
         'total_donations': total_donations,
         'total_expenses': total_expenses,
         'net_budget': net_budget,
+        'prev_year_balance': prev_year_balance,
         'pending_tasks_count': pending_tasks_count,
         'volunteers_count': volunteers_count,
         'upcoming_events': upcoming_events,
@@ -540,12 +544,15 @@ def prasad_add(request):
 @login_required
 @admin_only
 def reports_view(request):
+    config = PujaConfiguration.objects.first()
+    prev_year_balance = config.previous_year_balance if config and config.previous_year_balance else 0.00
+
     donations = Donation.objects.all().order_by('-date_received')
     expenses = Expense.objects.all().order_by('-date_incurred')
     
     total_donations = donations.aggregate(total=Sum('amount'))['total'] or 0
     total_expenses = expenses.aggregate(total=Sum('amount'))['total'] or 0
-    net_balance = total_donations - total_expenses
+    net_balance = prev_year_balance + total_donations - total_expenses
     
     vendors = Vendor.objects.filter(pending_amount__gt=0)
     total_vendor_dues = vendors.aggregate(total=Sum('pending_amount'))['total'] or 0
@@ -559,6 +566,7 @@ def reports_view(request):
         'total_donations': total_donations,
         'total_expenses': total_expenses,
         'net_balance': net_balance,
+        'prev_year_balance': prev_year_balance,
         'vendors': vendors,
         'total_vendor_dues': total_vendor_dues,
         'inventory_items': inventory_items,
