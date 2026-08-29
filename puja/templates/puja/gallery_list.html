@@ -1,0 +1,51 @@
+{% extends 'puja/base.html' %}
+
+{% block title %}Gallery - Ganesh Puja Portal{% endblock %}
+{% block page_title %}Photo & Video Gallery{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <span class="text-muted">Highlights and media albums of the celebrations.</span>
+    {% if user.role == 'SUPER_ADMIN' or user.is_superuser %}
+        <div>
+            <a href="{% url 'album_add' %}" class="btn btn-outline-warning text-dark fw-bold me-2"><i class="fa-solid fa-folder-plus me-1"></i> New Album</a>
+            <a href="{% url 'media_add' %}" class="btn btn-warning text-dark fw-bold"><i class="fa-solid fa-cloud-arrow-up me-1"></i> Upload Photo/Video</a>
+        </div>
+    {% endif %}
+</div>
+
+{% for album in albums %}
+    <div class="card p-4 mb-4">
+        <h4 class="fw-bold mb-1 text-dark">{{ album.title }}</h4>
+        <p class="text-muted mb-3">{{ album.description|default:"Ganesh Puja Event Album" }}</p>
+        
+        <div class="row g-3">
+            {% for item in album.media_files.all %}
+                <div class="col-sm-6 col-md-4 col-lg-3">
+                    <div class="card h-100 shadow-sm border">
+                        {% if item.file.url|lower|slice:"-4:" == ".mp4" or item.file.url|lower|slice:"-4:" == ".mov" %}
+                            <video src="{{ item.file.url }}" class="card-img-top" controls style="max-height: 200px; object-fit: cover;"></video>
+                        {% else %}
+                            <img src="{{ item.file.url }}" class="card-img-top" alt="Gallery image" style="max-height: 200px; object-fit: cover;">
+                        {% endif %}
+                        {% if item.caption %}
+                            <div class="card-footer bg-white border-top-0 py-2">
+                                <small class="text-muted">{{ item.caption }}</small>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% empty %}
+                <div class="col-12">
+                    <span class="text-muted small">No photos or videos added to this album yet.</span>
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+{% empty %}
+    <div class="card p-4 text-center text-muted">
+        <i class="fa-solid fa-images fa-3x mb-3 text-secondary"></i>
+        <p class="mb-0">No albums created yet.</p>
+    </div>
+{% endfor %}
+{% endblock %}

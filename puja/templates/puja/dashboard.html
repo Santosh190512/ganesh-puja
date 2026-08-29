@@ -1,0 +1,209 @@
+{% extends 'puja/base.html' %}
+
+{% block title %}Dashboard - Ganesh Puja Portal{% endblock %}
+{% block page_title %}Puja Management Dashboard{% endblock %}
+
+{% block content %}
+<!-- Metrics Cards -->
+<div class="row g-4 mb-4">
+    <div class="col-md-4 col-lg-2">
+        <div class="card bg-primary text-white p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-uppercase small mb-1">Total Budget</h6>
+                    <h4 class="mb-0">Rs. {{ net_budget }}</h4>
+                </div>
+                <i class="fa-solid fa-wallet fa-2x opacity-50"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+        <div class="card bg-success text-white p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-uppercase small mb-1">Donations</h6>
+                    <h4 class="mb-0">Rs. {{ total_donations }}</h4>
+                </div>
+                <i class="fa-solid fa-hand-holding-dollar fa-2x opacity-50"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+        <div class="card bg-danger text-white p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-uppercase small mb-1">Expenses</h6>
+                    <h4 class="mb-0">Rs. {{ total_expenses }}</h4>
+                </div>
+                <i class="fa-solid fa-file-invoice-dollar fa-2x opacity-50"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+        <div class="card bg-warning text-dark p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-uppercase small mb-1">Pending Duties</h6>
+                    <h4 class="mb-0">{{ pending_tasks_count }}</h4>
+                </div>
+                <i class="fa-solid fa-list-check fa-2x opacity-50"></i>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4 col-lg-2">
+        <div class="card bg-info text-white p-3 h-100">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h6 class="text-uppercase small mb-1">Volunteers</h6>
+                    <h4 class="mb-0">{{ volunteers_count }}</h4>
+                </div>
+                <i class="fa-solid fa-users fa-2x opacity-50"></i>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4">
+    <!-- Chart Column -->
+    <div class="col-lg-6">
+        <div class="card p-4 h-100">
+            <h5 class="card-title mb-3"><i class="fa-solid fa-chart-pie text-secondary me-2"></i>Expenses by Category</h5>
+            <div style="max-height: 300px; position: relative;">
+                <canvas id="expenseChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Quick Announcements -->
+    <div class="col-lg-6">
+        <div class="card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="card-title mb-0"><i class="fa-solid fa-bullhorn text-secondary me-2"></i>Recent Announcements</h5>
+                <a href="{% url 'announcement_list' %}" class="btn btn-sm btn-outline-secondary">View All</a>
+            </div>
+            {% if announcements %}
+                <div class="list-group list-group-flush">
+                {% for item in announcements %}
+                    <div class="list-group-item px-0">
+                        <div class="d-flex w-100 justify-content-between">
+                            <h6 class="mb-1 fw-bold">{{ item.title }}</h6>
+                            <small class="text-muted">{{ item.created_at|date:"d M H:i" }}</small>
+                        </div>
+                        <p class="mb-1 text-secondary small">{{ item.message }}</p>
+                        <span class="badge bg-secondary-subtle text-secondary small">{{ item.get_category_display }}</span>
+                    </div>
+                {% endfor %}
+                </div>
+            {% else %}
+                <p class="text-muted small">No announcements posted yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mt-2">
+    <!-- Upcoming Events -->
+    <div class="col-lg-6">
+        <div class="card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="card-title mb-0"><i class="fa-solid fa-calendar text-secondary me-2"></i>Upcoming Schedule</h5>
+                <a href="{% url 'event_list' %}" class="btn btn-sm btn-outline-secondary">Schedule</a>
+            </div>
+            {% if upcoming_events %}
+                <ul class="list-group list-group-flush">
+                {% for event in upcoming_events %}
+                    <li class="list-group-item px-0 d-flex justify-content-between align-items-center">
+                        <div>
+                            <span class="fw-bold">{{ event.title }}</span>
+                            <div class="text-muted small"><i class="fa-solid fa-clock me-1"></i> {{ event.start_time }}</div>
+                        </div>
+                        <span class="badge bg-primary">{{ event.get_event_type_display }}</span>
+                    </li>
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p class="text-muted small">No upcoming events scheduled.</p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Recent Donations -->
+    <div class="col-lg-6">
+        <div class="card p-4 h-100">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="card-title mb-0"><i class="fa-solid fa-heart text-danger me-2"></i>Recent Donations</h5>
+                <a href="{% url 'donation_list' %}" class="btn btn-sm btn-outline-secondary">All Donations</a>
+            </div>
+            {% if recent_donations %}
+                <div class="table-responsive">
+                    <table class="table table-sm table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Donor</th>
+                                <th>Amount</th>
+                                <th>Method</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for donation in recent_donations %}
+                            <tr>
+                                <td>
+                                    {% if donation.is_anonymous %}
+                                        <span class="text-muted italic">Anonymous</span>
+                                    {% else %}
+                                        {{ donation.donor_name|default:"General Donor" }}
+                                    {% endif %}
+                                </td>
+                                <td class="fw-bold text-success">Rs. {{ donation.amount }}</td>
+                                <td><span class="badge bg-info text-dark">{{ donation.payment_method }}</span></td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            {% else %}
+                <p class="text-muted small text-center mt-3">No donations registered yet.</p>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<!-- ChartJS Script -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        const ctx = document.getElementById('expenseChart').getContext('2d');
+        const categories = {{ categories|safe }};
+        const data = {{ expense_totals|safe }};
+        
+        if (categories.length === 0) {
+            ctx.font = "14px sans-serif";
+            ctx.fillStyle = "#888";
+            ctx.fillText("No expense records to display chart.", 50, 100);
+            return;
+        }
+
+        new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: categories,
+                datasets: [{
+                    data: data,
+                    backgroundColor: [
+                        '#0d6efd', '#198754', '#dc3545', '#ffc107', '#0dcaf0', 
+                        '#6610f2', '#fd7e14', '#20c997', '#d63384', '#6c757d'
+                    ],
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'bottom',
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

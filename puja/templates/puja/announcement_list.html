@@ -1,0 +1,46 @@
+{% extends 'puja/base.html' %}
+
+{% block title %}Announcements - Ganesh Puja Portal{% endblock %}
+{% block page_title %}WhatsApp-style Announcements Feed{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <span class="text-muted">Broadcast updates, emergency notices, or timing alerts instantly.</span>
+    {% if user.role == 'SUPER_ADMIN' or user.is_superuser %}
+        <a href="{% url 'announcement_add' %}" class="btn btn-warning text-dark fw-bold"><i class="fa-solid fa-bullhorn me-1"></i> Make Announcement</a>
+    {% endif %}
+</div>
+
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        {% for note in announcements %}
+            <div class="card mb-3 border-start border-4 {% if note.category == 'EMERGENCY_NOTICE' %}border-danger{% elif note.category == 'VOLUNTEER_MESSAGE' %}border-warning{% elif note.category == 'PUJA_TIMING' %}border-success{% else %}border-primary{% endif %}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge 
+                            {% if note.category == 'EMERGENCY_NOTICE' %}bg-danger
+                            {% elif note.category == 'VOLUNTEER_MESSAGE' %}bg-warning text-dark
+                            {% elif note.category == 'PUJA_TIMING' %}bg-success
+                            {% else %}bg-primary{% endif %}">
+                            {{ note.get_category_display }}
+                        </span>
+                        <small class="text-muted"><i class="fa-solid fa-clock me-1"></i> {{ note.created_at }}</small>
+                    </div>
+                    <h5 class="card-title fw-bold text-dark">{{ note.title }}</h5>
+                    <p class="card-text text-secondary" style="white-space: pre-line;">{{ note.message }}</p>
+                    <div class="border-top pt-2 mt-2 d-flex justify-content-between align-items-center">
+                        <small class="text-muted"><i class="fa-solid fa-user me-1"></i> Posted by: <strong>{{ note.posted_by.username|default:"Admin" }}</strong></small>
+                        <a href="https://api.whatsapp.com/send?text=*{{ note.title }}*%0A%0A{{ note.message }}" class="btn btn-sm btn-success rounded-pill" target="_blank">
+                            <i class="fa-brands fa-whatsapp me-1"></i> Share on WhatsApp
+                        </a>
+                    </div>
+                </div>
+            </div>
+        {% empty %}
+            <div class="card p-4 text-center text-muted">
+                <i class="fa-solid fa-bullhorn fa-3x mb-3 text-secondary"></i>
+                <p class="mb-0">No announcements posted yet.</p>
+            </div>
+        {% endfor %}
+</div>
+{% endblock %}

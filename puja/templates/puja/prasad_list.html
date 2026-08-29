@@ -1,0 +1,44 @@
+{% extends 'puja/base.html' %}
+
+{% block title %}Prasad Planner - Ganesh Puja Portal{% endblock %}
+{% block page_title %}Prasad &amp; Bhandara Planner{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <span class="text-muted">Calculates food ingredient quantities and assigns volunteers dynamically based on headcount.</span>
+    {% if user.role == 'SUPER_ADMIN' or user.is_superuser %}
+         <a href="{% url 'prasad_add' %}" class="btn btn-warning text-dark fw-bold"><i class="fa-solid fa-calculator me-1"></i> Plan Prasad / Bhandara</a>
+    {% endif %}
+</div>
+
+<div class="row g-3">
+    {% for plan in planners %}
+    <div class="col-md-6">
+        <div class="card p-4 border h-100 shadow-sm">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+                <span class="badge bg-warning text-dark"><i class="fa-solid fa-people-group me-1"></i> Expected: {{ plan.expected_people }}</span>
+                <span class="text-muted small"><i class="fa-solid fa-calendar me-1"></i> {{ plan.date }}</span>
+            </div>
+            <h5 class="fw-bold mb-2">Food Items:</h5>
+            <p class="text-secondary small mb-3">{{ plan.food_items }}</p>
+            
+            <h6 class="fw-bold text-dark mb-1">Quantity Calculations:</h6>
+            <pre class="bg-light p-2 rounded small text-dark" style="font-family: inherit;">{{ plan.quantity_calculations }}</pre>
+
+            <h6 class="fw-bold text-dark mb-1">Volunteers Assigned:</h6>
+            <div class="d-flex flex-wrap gap-1">
+                {% for vol in plan.volunteers_assigned.all %}
+                    <span class="badge bg-secondary">{{ vol.username }}</span>
+                {% empty %}
+                    <span class="text-muted small">No volunteers assigned to distribution yet.</span>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    {% empty %}
+    <div class="col-12 text-center text-muted">
+        <p>No Bhandara / Prasad events planned yet.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}

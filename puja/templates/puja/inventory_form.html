@@ -1,0 +1,27 @@
+{% extends 'puja/base.html' %}
+
+{% block title %}Register Item - Ganesh Puja Portal{% endblock %}
+{% block page_title %}Register Inventory Item{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card p-4">
+            <h4 class="card-title mb-4"><i class="fa-solid fa-boxes-stacked text-warning me-2"></i>New Stock Item</h4>
+            <form method="POST">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label fw-bold">{{ field.label }}</label>
+                        {{ field }}
+                        {% for error in field.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-warning text-dark fw-bold w-100 mt-3">Register</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

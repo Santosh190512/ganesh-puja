@@ -1,0 +1,46 @@
+{% extends 'puja/base.html' %}
+
+{% block title %}My Duties - Ganesh Puja Portal{% endblock %}
+{% block page_title %}My Assigned Duties & Shifts{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        {% for duty in duties %}
+            <div class="card mb-3 p-4 border-start border-4 
+                {% if duty.status == 'COMPLETED' %}border-success
+                {% elif duty.status == 'ABSENT' %}border-danger
+                {% else %}border-warning{% endif %} shadow-sm">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                    <span class="badge 
+                        {% if duty.status == 'COMPLETED' %}bg-success
+                        {% elif duty.status == 'ABSENT' %}bg-danger
+                        {% else %}bg-warning text-dark{% endif %}">
+                        {{ duty.get_status_display }}
+                    </span>
+                    <small class="text-muted"><i class="fa-solid fa-clock me-1"></i> Shift: {{ duty.start_time }} to {{ duty.end_time }}</small>
+                </div>
+                <h5 class="fw-bold text-dark mb-1">{{ duty.duty_name }}</h5>
+                <p class="text-secondary small">{{ duty.description|default:"No description details provided." }}</p>
+                <div class="border-top pt-2 mt-2">
+                    <form method="POST" action="{% url 'duty_update' duty.pk %}" class="d-flex gap-2 align-items-center">
+                        {% csrf_token %}
+                        <label for="status" class="small text-muted">Update Status:</label>
+                        <select name="status" class="form-select form-select-sm w-auto">
+                            <option value="PENDING" {% if duty.status == 'PENDING' %}selected{% endif %}>Pending</option>
+                            <option value="COMPLETED" {% if duty.status == 'COMPLETED' %}selected{% endif %}>Completed</option>
+                            <option value="ABSENT" {% if duty.status == 'ABSENT' %}selected{% endif %}>Absent</option>
+                        </select>
+                        <button type="submit" class="btn btn-sm btn-outline-secondary">Update</button>
+                    </form>
+                </div>
+            </div>
+        {% empty %}
+            <div class="card p-4 text-center text-muted">
+                <i class="fa-solid fa-tasks fa-3x mb-3 text-secondary"></i>
+                <p class="mb-0">You have no duties assigned.</p>
+            </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

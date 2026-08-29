@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: ganesh-puja-portal
+    env: python
+    buildCommand: "./build.sh"
+    startCommand: "gunicorn ganesh_puja_project.wsgi:application"
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.10.0
+      - key: DJANGO_SETTINGS_MODULE
+        value: ganesh_puja_project.settings
+      - key: SECRET_KEY
+        generateValue: true

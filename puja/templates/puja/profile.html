@@ -1,0 +1,44 @@
+{% extends 'puja/base.html' %}
+
+{% block title %}My Profile - Ganesh Puja Portal{% endblock %}
+{% block page_title %}User Profile{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-4 mb-4">
+        <div class="card p-4 text-center">
+            <div class="mb-3">
+                <i class="fa-solid fa-circle-user text-secondary fa-5x"></i>
+            </div>
+            <h4>{{ user.username }}</h4>
+            <span class="badge bg-warning text-dark mb-2">{{ user.get_role_display }}</span>
+            <p class="text-muted mb-1"><i class="fa-solid fa-phone me-1"></i> {{ user.mobile|default:"Not Provided" }}</p>
+            <p class="text-muted"><i class="fa-solid fa-envelope me-1"></i> {{ user.email }}</p>
+            {% if user.team %}
+            <div class="alert alert-secondary py-2 mb-0">
+                <strong>Team:</strong> {{ user.team.name }}
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    
+    <div class="col-md-8">
+        <div class="card p-4">
+            <h4 class="mb-3">Update Personal Details</h4>
+            <form method="POST">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label fw-bold">{{ field.label }}</label>
+                        {{ field }}
+                        {% for error in field.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                <button type="submit" class="btn btn-warning text-dark fw-bold">Update Profile</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,59 @@
+{% extends 'puja/base.html' %}
+
+{% block title %}Inventory - Ganesh Puja Portal{% endblock %}
+{% block page_title %}Inventory &amp; Supplies Management{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <span class="text-muted">Track items (chairs, sound equipment, decoration items, puja samagri) & stock levels.</span>
+    {% if user.role == 'SUPER_ADMIN' or user.is_superuser %}
+        <div>
+            <a href="{% url 'inventory_transaction' %}" class="btn btn-outline-warning text-dark fw-bold me-2"><i class="fa-solid fa-right-left me-1"></i> Stock In/Out</a>
+            <a href="{% url 'inventory_add' %}" class="btn btn-warning text-dark fw-bold"><i class="fa-solid fa-plus me-1"></i> Register Item</a>
+        </div>
+    {% endif %}
+</div>
+
+<div class="card p-4">
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Item Name</th>
+                    <th>Category</th>
+                    <th>Total Qty</th>
+                    <th>Available Qty</th>
+                    <th>Vendor Link</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr>
+                    <td><strong>{{ item.name }}</strong></td>
+                    <td><span class="badge bg-secondary">{{ item.get_category_display }}</span></td>
+                    <td>{{ item.total_quantity }}</td>
+                    <td class="fw-bold {% if item.available_quantity == 0 %}text-danger{% else %}text-success{% endif %}">
+                        {{ item.available_quantity }}
+                    </td>
+                    <td>{{ item.vendor.name|default:"-" }}</td>
+                    <td>
+                        {% if item.available_quantity == 0 %}
+                            <span class="badge bg-danger">Out of Stock</span>
+                        {% elif item.available_quantity < 5 %}
+                            <span class="badge bg-warning text-dark">Low Stock</span>
+                        {% else %}
+                            <span class="badge bg-success">In Stock</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">No inventory items found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

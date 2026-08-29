@@ -1,0 +1,38 @@
+{% extends 'puja/base.html' %}
+
+{% block title %}Mark Attendance - Ganesh Puja Portal{% endblock %}
+{% block page_title %}Mark Volunteer Attendance{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <div class="card p-4">
+            <h4 class="fw-bold mb-1 text-dark"><i class="fa-solid fa-clipboard-user text-warning me-2"></i>Date: {{ today }}</h4>
+            <p class="text-muted mb-4">Select the volunteers who are present today, then click Save.</p>
+            
+            <form method="POST">
+                {% csrf_token %}
+                <div class="list-group mb-4">
+                    {% for item in attendance_data %}
+                        <label class="list-group-item d-flex justify-content-between align-items-center">
+                            <div>
+                                <input class="form-check-input me-2" type="checkbox" name="present_volunteers" value="{{ item.volunteer.id }}" {% if item.is_present %}checked{% endif %}>
+                                <strong>{{ item.volunteer.username }}</strong>
+                                <span class="text-secondary small ms-2">({{ item.volunteer.get_full_name }})</span>
+                            </div>
+                            {% if item.volunteer.team %}
+                                <span class="badge bg-secondary">{{ item.volunteer.team.name }}</span>
+                            {% endif %}
+                        </label>
+                    {% empty %}
+                        <div class="text-center text-muted py-3">No volunteers registered to track attendance.</div>
+                    {% endfor %}
+                </div>
+                {% if attendance_data %}
+                    <button type="submit" class="btn btn-warning text-dark fw-bold w-100">Save Attendance</button>
+                {% endif %}
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

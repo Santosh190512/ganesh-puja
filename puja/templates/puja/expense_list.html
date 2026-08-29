@@ -1,0 +1,54 @@
+{% extends 'puja/base.html' %}
+
+{% block title %}Expenses - Ganesh Puja Portal{% endblock %}
+{% block page_title %}Expense Management{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h4 class="mb-0 text-secondary">Total Expenses Incurred: <strong class="text-danger">Rs. {{ total_amount }}</strong></h4>
+    {% if user.role == 'SUPER_ADMIN' or user.is_superuser %}
+        <a href="{% url 'expense_add' %}" class="btn btn-warning text-dark fw-bold"><i class="fa-solid fa-plus me-1"></i> Log Expense</a>
+    {% endif %}
+</div>
+
+<div class="card p-4">
+    <div class="table-responsive">
+        <table class="table table-striped table-hover align-middle">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Description</th>
+                    <th>Amount</th>
+                    <th>Date Incurred</th>
+                    <th>Logged By</th>
+                    <th>Bill Attachment</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for expense in expenses %}
+                <tr>
+                    <td><span class="badge bg-secondary">{{ expense.get_category_display }}</span></td>
+                    <td>{{ expense.description }}</td>
+                    <td class="fw-bold text-danger">Rs. {{ expense.amount }}</td>
+                    <td>{{ expense.date_incurred|date:"d M Y" }}</td>
+                    <td>{{ expense.logged_by.username|default:"Admin" }}</td>
+                    <td>
+                        {% if expense.bill_file %}
+                            <a href="{{ expense.bill_file.url }}" class="btn btn-sm btn-outline-info" target="_blank">
+                                <i class="fa-solid fa-paperclip me-1"></i> View Bill
+                            </a>
+                        {% else %}
+                            <span class="text-muted small">No Bill Uploaded</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted py-4">No expense logs found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
