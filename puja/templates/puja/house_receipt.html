@@ -38,13 +38,23 @@
             .no-print {
                 display: none;
             }
-            body {
+            html, body {
+                height: 100%;
+                margin: 0;
+                padding: 0;
                 background: #fff;
+            }
+            body {
+                display: flex;
+                justify-content: center;
+                align-items: center;
             }
             .receipt-card {
                 box-shadow: none;
                 border: 2px solid #000;
-                margin: 0;
+                margin: auto;
+                width: 100%;
+                max-width: 650px;
             }
         }
     </style>
@@ -73,10 +83,6 @@
                 <tr>
                     <th style="width: 35%;">House Holder Name</th>
                     <td><strong>{{ donation.owner_name }}</strong></td>
-                </tr>
-                <tr>
-                    <th>House Details</th>
-                    <td>{{ donation.house_no|default:"-" }}</td>
                 </tr>
                 <tr>
                     <th>Sum of Rupees</th>
