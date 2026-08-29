@@ -8,8 +8,8 @@ from django.utils import timezone
 from .models import (CustomUser, VolunteerTeam, Donation, Expense, VolunteerDuty, 
                      Attendance, PujaEvent, Vendor, Quotation, VendorPayment, 
                      InventoryItem, StockTransaction, PrasadPlanner, Announcement, 
-                     GalleryAlbum, GalleryMedia, PujaConfiguration)
-from .forms import (CustomUserCreationForm, UserProfileForm, DonationForm, ExpenseForm, 
+                     GalleryAlbum, GalleryMedia, PujaConfiguration, HouseDonation)
+from .forms import (CustomUserCreationForm, UserProfileForm, DonationForm, HouseDonationForm, ExpenseForm, 
                     VolunteerTeamForm, DutyAssignmentForm, EventForm, InventoryItemForm, 
                     StockTransactionForm, VendorForm, QuotationForm, VendorPaymentForm, 
                     PrasadPlannerForm, AnnouncementForm, GalleryAlbumForm, GalleryMediaForm)
@@ -67,7 +67,9 @@ def dashboard_view(request):
     config = PujaConfiguration.objects.first()
     prev_year_balance = Decimal(str(config.previous_year_balance)) if config and config.previous_year_balance else Decimal('0.00')
 
-    total_donations = Decimal(Donation.objects.aggregate(total=Sum('amount'))['total'] or '0.00')
+    total_main_donations = Decimal(Donation.objects.aggregate(total=Sum('amount'))['total'] or '0.00')
+    total_house_donations = Decimal(HouseDonation.objects.aggregate(total=Sum('amount'))['total'] or '0.00')
+    total_donations = total_main_donations + total_house_donations
     total_expenses = Decimal(Expense.objects.aggregate(total=Sum('amount'))['total'] or '0.00')
     net_budget = prev_year_balance + total_donations - total_expenses
 
@@ -86,6 +88,8 @@ def dashboard_view(request):
 
     context = {
         'total_donations': total_donations,
+        'total_main_donations': total_main_donations,
+        'total_house_donations': total_house_donations,
         'total_expenses': total_expenses,
         'net_budget': net_budget,
         'prev_year_balance': prev_year_balance,
@@ -543,9 +547,13 @@ def reports_view(request):
     prev_year_balance = Decimal(str(config.previous_year_balance)) if config and config.previous_year_balance else Decimal('0.00')
 
     donations = Donation.objects.all().order_by('-date_received')
+    house_donations = HouseDonation.objects.all().order_by('-date_received')
     expenses = Expense.objects.all().order_by('-date_incurred')
     
-    total_donations = Decimal(donations.aggregate(total=Sum('amount'))['total'] or '0.00')
+    total_main_donations = Decimal(donations.aggregate(total=Sum('amount'))['total'] or '0.00')
+    total_house_donations = Decimal(house_donations.aggregate(total=Sum('amount'))['total'] or '0.00')
+    total_donations = total_main_donations + total_house_donations
+    
     total_expenses = Decimal(expenses.aggregate(total=Sum('amount'))['total'] or '0.00')
     net_balance = prev_year_balance + total_donations - total_expenses
     
@@ -557,7 +565,10 @@ def reports_view(request):
     
     context = {
         'donations': donations,
+        'house_donations': house_donations,
         'expenses': expenses,
+        'total_main_donations': total_main_donations,
+        'total_house_donations': total_house_donations,
         'total_donations': total_donations,
         'total_expenses': total_expenses,
         'net_balance': net_balance,
@@ -568,3 +579,33 @@ def reports_view(request):
         'volunteers': volunteers,
     }
     return render(request, 'puja/reports.html', context)
+
+
+# --- HOUSE DONATIONS ---
+
+def house_donation_list(request):
+    house_donations = HouseDonation.objects.all().order_by('-date_received')
+    total_amount = house_donations.aggregate(total=Sum('amount'))['total'] or 0
+    return render(request, 'puja/house_donation_list.html', {
+        'house_donations': house_donations,
+        'total_amount': total_amount
+    })
+
+@login_required
+@admin_only
+def house_donation_add(request):
+    if request.method == 'POST':
+        form = HouseDonationForm(request.POST)
+        if form.is_valid():
+            donation = form.save(commit=False)
+            donation.received_by = request.user
+            donation.save()
+            messages.success(request, f"House donation of Rs. {donation.amount} from {donation.owner_name} logged successfully!")
+            return redirect('house_donation_list')
+    else:
+        form = HouseDonationForm()
+    return render(request, 'puja/house_donation_form.html', {'form': form})
+
+def house_donation_receipt(request, pk):
+    donation = get_object_or_404(HouseDonation, pk=pk)
+    return render(request, 'puja/house_receipt.html', {'donation': donation})

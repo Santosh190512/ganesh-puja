@@ -41,7 +41,6 @@ class Donation(models.Model):
     ]
     donor_name = models.CharField(max_length=100, blank=True, null=True)
     donor_mobile = models.CharField(max_length=15, blank=True, null=True)
-    house_number = models.CharField(max_length=100, blank=True, null=True, verbose_name="House Name")
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_method = models.CharField(max_length=10, choices=PAYMENT_METHODS, default='CASH')
     transaction_id = models.CharField(max_length=100, blank=True, null=True)
@@ -257,3 +256,19 @@ class PujaConfiguration(models.Model):
 
     def __str__(self):
         return f"Puja Settings (Prev Year Balance: Rs. {self.previous_year_balance})"
+
+class HouseDonation(models.Model):
+    owner_name = models.CharField(max_length=100, verbose_name="House Holder Name")
+    house_no = models.CharField(max_length=100, verbose_name="House Number / Details", blank=True, null=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    date_received = models.DateTimeField(default=timezone.now)
+    received_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
+    receipt_number = models.CharField(max_length=50, unique=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        if not self.receipt_number:
+            self.receipt_number = f"HREC-{uuid.uuid4().hex[:8].upper()}"
+        super().save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.owner_name} ({self.house_no}) - Rs. {self.amount}"

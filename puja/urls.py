@@ -25,6 +25,11 @@ urlpatterns = [
     path('donations/add/', views.donation_add, name='donation_add'),
     path('donations/receipt/<int:pk>/', views.donation_receipt, name='donation_receipt'),
     
+    # House-wise Donations
+    path('house-donations/', views.house_donation_list, name='house_donation_list'),
+    path('house-donations/add/', views.house_donation_add, name='house_donation_add'),
+    path('house-donations/receipt/<int:pk>/', views.house_donation_receipt, name='house_donation_receipt'),
+    
     # Expenses
     path('expenses/', views.expense_list, name='expense_list'),
     path('expenses/add/', views.expense_add, name='expense_add'),

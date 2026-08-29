@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 from .models import (CustomUser, VolunteerTeam, Donation, Expense, VolunteerDuty, 
                      Attendance, PujaEvent, Vendor, Quotation, VendorPayment, 
                      InventoryItem, StockTransaction, PrasadPlanner, Announcement, 
-                     GalleryAlbum, GalleryMedia, PujaConfiguration)
+                     GalleryAlbum, GalleryMedia, PujaConfiguration, HouseDonation)
 
 class CustomUserAdmin(UserAdmin):
     model = CustomUser
@@ -32,4 +32,5 @@ admin.site.register(Announcement)
 admin.site.register(GalleryAlbum)
 admin.site.register(GalleryMedia)
 admin.site.register(PujaConfiguration)
+admin.site.register(HouseDonation)
 

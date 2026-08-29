@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from .models import (CustomUser, VolunteerTeam, Donation, Expense, VolunteerDuty, 
                      Attendance, PujaEvent, Vendor, Quotation, VendorPayment, 
                      InventoryItem, StockTransaction, PrasadPlanner, Announcement, 
-                     GalleryAlbum, GalleryMedia)
+                     GalleryAlbum, GalleryMedia, HouseDonation)
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
@@ -28,11 +28,10 @@ class UserProfileForm(forms.ModelForm):
 class DonationForm(forms.ModelForm):
     class Meta:
         model = Donation
-        fields = ('donor_name', 'donor_mobile', 'house_number', 'amount', 'payment_method', 'transaction_id', 'is_anonymous', 'receipt_file', 'material_description')
+        fields = ('donor_name', 'donor_mobile', 'amount', 'payment_method', 'transaction_id', 'is_anonymous', 'receipt_file', 'material_description')
         widgets = {
             'donor_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Donor Name / Owner Name'}),
             'donor_mobile': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Donor Mobile'}),
-            'house_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Sahoo Niwas / Mishra Bhawan (Optional)'}),
             'amount': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Amount in Rs. (Optional for material donations)'}),
             'payment_method': forms.Select(attrs={'class': 'form-control'}),
             'transaction_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Transaction ID (Optional)'}),
@@ -44,8 +43,17 @@ class DonationForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['amount'].required = False
-        self.fields['house_number'].required = False
         self.fields['material_description'].required = False
+
+class HouseDonationForm(forms.ModelForm):
+    class Meta:
+        model = HouseDonation
+        fields = ('owner_name', 'house_no', 'amount')
+        widgets = {
+            'owner_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter House Holder Name'}),
+            'house_no': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Lane-3 / Plot-201 / Sahoo Niwas'}),
+            'amount': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Amount Collected (Rs.)'}),
+        }
 
 class ExpenseForm(forms.ModelForm):
     class Meta:
