@@ -36,6 +36,9 @@
                             <span class="text-muted italic"><i class="fa-solid fa-user-secret me-1"></i> Anonymous</span>
                         {% else %}
                             {{ donation.donor_name|default:"General Donor" }}
+                            {% if donation.house_number %}
+                                <div class="small text-muted" style="font-size: 0.8rem;"><i class="fa-solid fa-house me-1"></i>{{ donation.house_number }}</div>
+                            {% endif %}
                         {% endif %}
                     </td>
                     <td>{{ donation.donor_mobile|default:"-" }}</td>

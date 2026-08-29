@@ -84,6 +84,12 @@
                     <th>Mobile Number</th>
                     <td>{{ donation.donor_mobile|default:"-" }}</td>
                 </tr>
+                {% if donation.house_number %}
+                <tr>
+                    <th>House No. / Address</th>
+                    <td>{{ donation.house_number }}</td>
+                </tr>
+                {% endif %}
                 <tr>
                     <th>Sum of Rupees</th>
                     <td class="fw-bold text-success fs-5">Rs. {{ donation.amount }}/-</td>

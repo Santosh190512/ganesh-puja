@@ -28,10 +28,11 @@ class UserProfileForm(forms.ModelForm):
 class DonationForm(forms.ModelForm):
     class Meta:
         model = Donation
-        fields = ('donor_name', 'donor_mobile', 'amount', 'payment_method', 'transaction_id', 'is_anonymous', 'receipt_file', 'material_description')
+        fields = ('donor_name', 'donor_mobile', 'house_number', 'amount', 'payment_method', 'transaction_id', 'is_anonymous', 'receipt_file', 'material_description')
         widgets = {
-            'donor_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Donor Name'}),
+            'donor_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Donor Name / Owner Name'}),
             'donor_mobile': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Donor Mobile'}),
+            'house_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. House No. 42 / Lane 3 (Optional)'}),
             'amount': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Amount in Rs. (Optional for material donations)'}),
             'payment_method': forms.Select(attrs={'class': 'form-control'}),
             'transaction_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Transaction ID (Optional)'}),
@@ -43,6 +44,7 @@ class DonationForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['amount'].required = False
+        self.fields['house_number'].required = False
         self.fields['material_description'].required = False
 
 class ExpenseForm(forms.ModelForm):
