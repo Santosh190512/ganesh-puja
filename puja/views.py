@@ -1,3 +1,4 @@
+from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login, logout, authenticate
 from django.contrib.auth.decorators import login_required
@@ -65,10 +66,10 @@ def profile_view(request):
 @login_required
 def dashboard_view(request):
     config = PujaConfiguration.objects.first()
-    prev_year_balance = config.previous_year_balance if config and config.previous_year_balance else 0.00
+    prev_year_balance = Decimal(str(config.previous_year_balance)) if config and config.previous_year_balance else Decimal('0.00')
 
-    total_donations = Donation.objects.aggregate(total=Sum('amount'))['total'] or 0
-    total_expenses = Expense.objects.aggregate(total=Sum('amount'))['total'] or 0
+    total_donations = Decimal(Donation.objects.aggregate(total=Sum('amount'))['total'] or '0.00')
+    total_expenses = Decimal(Expense.objects.aggregate(total=Sum('amount'))['total'] or '0.00')
     net_budget = prev_year_balance + total_donations - total_expenses
 
     pending_tasks_count = VolunteerDuty.objects.filter(status='PENDING').count()
@@ -545,13 +546,13 @@ def prasad_add(request):
 @admin_only
 def reports_view(request):
     config = PujaConfiguration.objects.first()
-    prev_year_balance = config.previous_year_balance if config and config.previous_year_balance else 0.00
+    prev_year_balance = Decimal(str(config.previous_year_balance)) if config and config.previous_year_balance else Decimal('0.00')
 
     donations = Donation.objects.all().order_by('-date_received')
     expenses = Expense.objects.all().order_by('-date_incurred')
     
-    total_donations = donations.aggregate(total=Sum('amount'))['total'] or 0
-    total_expenses = expenses.aggregate(total=Sum('amount'))['total'] or 0
+    total_donations = Decimal(donations.aggregate(total=Sum('amount'))['total'] or '0.00')
+    total_expenses = Decimal(expenses.aggregate(total=Sum('amount'))['total'] or '0.00')
     net_balance = prev_year_balance + total_donations - total_expenses
     
     vendors = Vendor.objects.filter(pending_amount__gt=0)
