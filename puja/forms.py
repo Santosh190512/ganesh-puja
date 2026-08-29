@@ -32,7 +32,7 @@ class DonationForm(forms.ModelForm):
         widgets = {
             'donor_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Donor Name / Owner Name'}),
             'donor_mobile': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Donor Mobile'}),
-            'house_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. House No. 42 / Lane 3 (Optional)'}),
+            'house_number': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. Sahoo Niwas / Mishra Bhawan (Optional)'}),
             'amount': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Amount in Rs. (Optional for material donations)'}),
             'payment_method': forms.Select(attrs={'class': 'form-control'}),
             'transaction_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Transaction ID (Optional)'}),

@@ -41,7 +41,7 @@ class Donation(models.Model):
     ]
     donor_name = models.CharField(max_length=100, blank=True, null=True)
     donor_mobile = models.CharField(max_length=15, blank=True, null=True)
-    house_number = models.CharField(max_length=100, blank=True, null=True, verbose_name="House Number / Address")
+    house_number = models.CharField(max_length=100, blank=True, null=True, verbose_name="House Name")
     amount = models.DecimalField(max_digits=10, decimal_places=2)
     payment_method = models.CharField(max_length=10, choices=PAYMENT_METHODS, default='CASH')
     transaction_id = models.CharField(max_length=100, blank=True, null=True)
