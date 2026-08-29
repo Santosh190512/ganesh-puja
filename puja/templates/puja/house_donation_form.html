@@ -1,13 +1,13 @@
 {% extends 'puja/base.html' %}
 
-{% block title %}Log House Collection - Ganesh Puja Portal{% endblock %}
-{% block page_title %}Log House-to-House Collection{% endblock %}
+{% block title %}Log House-wise Collection - Ganesh Puja Portal{% endblock %}
+{% block page_title %}Log House-wise Collection{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-6">
         <div class="card p-4">
-            <h4 class="card-title mb-4"><i class="fa-solid fa-house-chimney-user text-warning me-2"></i>House Collection Form</h4>
+            <h4 class="card-title mb-4"><i class="fa-solid fa-house-chimney-user text-warning me-2"></i>House-wise Collection Form</h4>
             <form method="POST">
                 {% csrf_token %}
                 {% for field in form %}
@@ -19,7 +19,7 @@
                         {% endfor %}
                     </div>
                 {% endfor %}
-                <button type="submit" class="btn btn-warning text-dark fw-bold w-100 mt-3">Log House Donation</button>
+                <button type="submit" class="btn btn-warning text-dark fw-bold w-100 mt-3">Log House-wise Collection</button>
             </form>
         </div>
     </div>
