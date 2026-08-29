@@ -59,6 +59,7 @@
                 <div class="mb-3 px-2 text-warning small">
                     <i class="fa-solid fa-user-shield me-1"></i> {{ user.get_role_display }}
                 </div>
+                {% endif %}
                 <ul class="nav flex-column gap-1">
                     <li class="nav-item">
                         <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
@@ -81,6 +82,7 @@
                         </a>
                     </li>
                     <hr class="text-secondary">
+                    {% if user.is_authenticated %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'profile' %}">
                             <i class="fa-solid fa-user me-2"></i> Profile
@@ -91,9 +93,7 @@
                             <i class="fa-solid fa-right-from-bracket me-2"></i> Logout
                         </a>
                     </li>
-                </ul>
-                {% else %}
-                <ul class="nav flex-column gap-1">
+                    {% else %}
                     <li class="nav-item">
                         <a class="nav-link" href="{% url 'login' %}">
                             <i class="fa-solid fa-right-to-bracket me-2"></i> Login
@@ -104,8 +104,8 @@
                             <i class="fa-solid fa-user-plus me-2"></i> Register
                         </a>
                     </li>
+                    {% endif %}
                 </ul>
-                {% endif %}
             </nav>
 
             <!-- Main Content Area -->

@@ -63,7 +63,6 @@ def profile_view(request):
 
 # --- DASHBOARD ---
 
-@login_required
 def dashboard_view(request):
     config = PujaConfiguration.objects.first()
     prev_year_balance = Decimal(str(config.previous_year_balance)) if config and config.previous_year_balance else Decimal('0.00')
@@ -160,7 +159,6 @@ def media_add(request):
 
 # --- DONATIONS ---
 
-@login_required
 def donation_list(request):
     donations = Donation.objects.all().order_by('-date_received')
     total_amount = donations.aggregate(total=Sum('amount'))['total'] or 0
@@ -214,7 +212,6 @@ def donation_add(request):
         form = DonationForm()
     return render(request, 'puja/donation_form.html', {'form': form})
 
-@login_required
 def donation_receipt(request, pk):
     donation = get_object_or_404(Donation, pk=pk)
     return render(request, 'puja/receipt.html', {'donation': donation})
@@ -222,7 +219,6 @@ def donation_receipt(request, pk):
 
 # --- EXPENSES ---
 
-@login_required
 def expense_list(request):
     expenses = Expense.objects.all().order_by('-date_incurred')
     total_amount = expenses.aggregate(total=Sum('amount'))['total'] or 0
@@ -542,8 +538,6 @@ def prasad_add(request):
 
 # --- REPORTS ---
 
-@login_required
-@admin_only
 def reports_view(request):
     config = PujaConfiguration.objects.first()
     prev_year_balance = Decimal(str(config.previous_year_balance)) if config and config.previous_year_balance else Decimal('0.00')

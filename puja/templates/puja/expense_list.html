@@ -6,7 +6,7 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h4 class="mb-0 text-secondary">Total Expenses Incurred: <strong class="text-danger">Rs. {{ total_amount }}</strong></h4>
-    {% if user.role == 'SUPER_ADMIN' or user.is_superuser %}
+    {% if user.is_authenticated and user.role == 'SUPER_ADMIN' or user.is_superuser %}
         <a href="{% url 'expense_add' %}" class="btn btn-warning text-dark fw-bold"><i class="fa-solid fa-plus me-1"></i> Log Expense</a>
     {% endif %}
 </div>
