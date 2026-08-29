@@ -8,12 +8,22 @@ from django.utils import timezone
 from .models import (CustomUser, VolunteerTeam, Donation, Expense, VolunteerDuty, 
                      Attendance, PujaEvent, Vendor, Quotation, VendorPayment, 
                      InventoryItem, StockTransaction, PrasadPlanner, Announcement, 
-                     GalleryAlbum, GalleryMedia, PujaConfiguration, HouseDonation)
+                     GalleryAlbum, GalleryMedia, PujaConfiguration, HouseDonation, AuditLog)
 from .forms import (CustomUserCreationForm, UserProfileForm, DonationForm, HouseDonationForm, ExpenseForm, 
                     VolunteerTeamForm, DutyAssignmentForm, EventForm, InventoryItemForm, 
                     StockTransactionForm, VendorForm, QuotationForm, VendorPaymentForm, 
                     PrasadPlannerForm, AnnouncementForm, GalleryAlbumForm, GalleryMediaForm)
 from .decorators import role_required, admin_only
+
+def log_action(user, action_type, model_name, object_id, object_repr, details=""):
+    AuditLog.objects.create(
+        user=user if (user and user.is_authenticated) else None,
+        action_type=action_type,
+        model_name=model_name,
+        object_id=object_id,
+        object_repr=object_repr,
+        details=details
+    )
 
 # --- AUTHENTICATION VIEWS ---
 
@@ -210,7 +220,11 @@ def donation_add(request):
                     messages.warning(request, f"Screenshot uploaded, but automatic scan failed: {ex}. Please enter details manually.")
             else:
                 messages.success(request, f"Donation of Rs. {donation.amount} logged successfully!")
-                
+            
+            log_action(
+                request.user, 'ADD', 'Donation', donation.id, str(donation),
+                f"Amount: Rs. {donation.amount}, Donor: {donation.donor_name or 'Anonymous'}, Method: {donation.payment_method}"
+            )
             return redirect('donation_list')
     else:
         form = DonationForm()
@@ -270,7 +284,11 @@ def expense_add(request):
                     messages.warning(request, f"Bill uploaded, but automatic scan failed: {ex}. Please enter details manually.")
             else:
                 messages.success(request, f"Expense of Rs. {expense.amount} logged successfully!")
-                
+            
+            log_action(
+                request.user, 'ADD', 'Expense', expense.id, str(expense),
+                f"Amount: Rs. {expense.amount}, Category: {expense.get_category_display()}, Desc: {expense.description}"
+            )
             return redirect('expense_list')
     else:
         form = ExpenseForm()
@@ -601,6 +619,10 @@ def house_donation_add(request):
             donation.received_by = request.user
             donation.save()
             messages.success(request, f"House donation of Rs. {donation.amount} from {donation.owner_name} logged successfully!")
+            log_action(
+                request.user, 'ADD', 'HouseDonation', donation.id, str(donation),
+                f"Amount: Rs. {donation.amount}, Owner: {donation.owner_name}, House No: {donation.house_no or '-'}"
+            )
             return redirect('house_donation_list')
     else:
         form = HouseDonationForm()
@@ -609,3 +631,48 @@ def house_donation_add(request):
 def house_donation_receipt(request, pk):
     donation = get_object_or_404(HouseDonation, pk=pk)
     return render(request, 'puja/house_receipt.html', {'donation': donation})
+
+@login_required
+@admin_only
+def donation_delete(request, pk):
+    if request.method == 'POST':
+        donation = get_object_or_404(Donation, pk=pk)
+        log_action(
+            request.user, 'DELETE', 'Donation', donation.id, str(donation),
+            f"Amount: Rs. {donation.amount}, Donor: {donation.donor_name or 'Anonymous'}, Method: {donation.payment_method}"
+        )
+        donation.delete()
+        messages.success(request, "Donation record deleted successfully.")
+    return redirect('donation_list')
+
+@login_required
+@admin_only
+def expense_delete(request, pk):
+    if request.method == 'POST':
+        expense = get_object_or_404(Expense, pk=pk)
+        log_action(
+            request.user, 'DELETE', 'Expense', expense.id, str(expense),
+            f"Amount: Rs. {expense.amount}, Category: {expense.get_category_display()}, Desc: {expense.description}"
+        )
+        expense.delete()
+        messages.success(request, "Expense record deleted successfully.")
+    return redirect('expense_list')
+
+@login_required
+@admin_only
+def house_donation_delete(request, pk):
+    if request.method == 'POST':
+        donation = get_object_or_404(HouseDonation, pk=pk)
+        log_action(
+            request.user, 'DELETE', 'HouseDonation', donation.id, str(donation),
+            f"Amount: Rs. {donation.amount}, Owner: {donation.owner_name}, House No: {donation.house_no or '-'}"
+        )
+        donation.delete()
+        messages.success(request, "House-wise collection record deleted successfully.")
+    return redirect('house_donation_list')
+
+@login_required
+@admin_only
+def history_log_view(request):
+    logs = AuditLog.objects.all().order_by('-timestamp').select_related('user')
+    return render(request, 'puja/history_log.html', {'logs': logs})

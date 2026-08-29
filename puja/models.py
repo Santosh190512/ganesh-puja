@@ -272,3 +272,15 @@ class HouseDonation(models.Model):
 
     def __str__(self):
         return f"{self.owner_name} ({self.house_no}) - Rs. {self.amount}"
+
+class AuditLog(models.Model):
+    user = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True, blank=True)
+    action_type = models.CharField(max_length=50) # e.g. ADD, DELETE
+    model_name = models.CharField(max_length=100) # e.g. Donation, Expense, HouseDonation
+    object_id = models.IntegerField(null=True, blank=True)
+    object_repr = models.CharField(max_length=255)
+    timestamp = models.DateTimeField(default=timezone.now)
+    details = models.TextField(blank=True, null=True)
+
+    def __str__(self):
+        return f"{self.user.username if self.user else 'System'} - {self.action_type} - {self.model_name} at {self.timestamp}"

@@ -23,7 +23,6 @@
                     <th>Method</th>
                     <th>Transaction ID</th>
                     <th>Date</th>
-                    <th>Logged By</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -53,11 +52,20 @@
                     <td><span class="badge bg-info text-dark">{{ donation.get_payment_method_display }}</span></td>
                     <td>{{ donation.transaction_id|default:"-" }}</td>
                     <td>{{ donation.date_received|date:"d M Y H:i" }}</td>
-                    <td>{{ donation.received_by.username|default:"Admin" }}</td>
                     <td>
-                        <a href="{% url 'donation_receipt' donation.pk %}" class="btn btn-sm btn-outline-primary" target="_blank">
-                            <i class="fa-solid fa-receipt me-1"></i> Receipt
-                        </a>
+                        <div class="d-flex gap-1">
+                            <a href="{% url 'donation_receipt' donation.pk %}" class="btn btn-sm btn-outline-primary" target="_blank">
+                                <i class="fa-solid fa-receipt me-1"></i> Receipt
+                            </a>
+                            {% if user.is_authenticated and user.role == 'SUPER_ADMIN' or user.is_superuser %}
+                                <form action="{% url 'donation_delete' donation.pk %}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this donation record? This action cannot be undone.');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="fa-solid fa-trash me-1"></i> Delete
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
                     </td>
                 </tr>
                 {% empty %}

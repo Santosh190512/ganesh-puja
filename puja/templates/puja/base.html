@@ -86,6 +86,13 @@
                             <i class="fa-solid fa-chart-pie me-2"></i> Reports
                         </a>
                     </li>
+                    {% if user.is_authenticated and user.role == 'SUPER_ADMIN' or user.is_superuser %}
+                    <li class="nav-item">
+                        <a class="nav-link {% if 'history' in request.path %}active{% endif %}" href="{% url 'history_log' %}">
+                            <i class="fa-solid fa-clock-rotate-left me-2"></i> History Log
+                        </a>
+                    </li>
+                    {% endif %}
                     <hr class="text-secondary">
                     {% if user.is_authenticated %}
                     <li class="nav-item">

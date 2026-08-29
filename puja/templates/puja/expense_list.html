@@ -20,8 +20,7 @@
                     <th>Description</th>
                     <th>Amount</th>
                     <th>Date Incurred</th>
-                    <th>Logged By</th>
-                    <th>Bill Attachment</th>
+                    <th>Actions</th>
                 </tr>
             </thead>
             <tbody>
@@ -31,15 +30,22 @@
                     <td>{{ expense.description }}</td>
                     <td class="fw-bold text-danger">Rs. {{ expense.amount }}</td>
                     <td>{{ expense.date_incurred|date:"d M Y" }}</td>
-                    <td>{{ expense.logged_by.username|default:"Admin" }}</td>
                     <td>
-                        {% if expense.bill_file %}
-                            <a href="{{ expense.bill_file.url }}" class="btn btn-sm btn-outline-info" target="_blank">
-                                <i class="fa-solid fa-paperclip me-1"></i> View Bill
-                            </a>
-                        {% else %}
-                            <span class="text-muted small">No Bill Uploaded</span>
-                        {% endif %}
+                        <div class="d-flex gap-1">
+                            {% if expense.bill_file %}
+                                <a href="{{ expense.bill_file.url }}" class="btn btn-sm btn-outline-info" target="_blank">
+                                    <i class="fa-solid fa-paperclip me-1"></i> Bill
+                                </a>
+                            {% endif %}
+                            {% if user.is_authenticated and user.role == 'SUPER_ADMIN' or user.is_superuser %}
+                                <form action="{% url 'expense_delete' expense.pk %}" method="POST" class="d-inline" onsubmit="return confirm('Are you sure you want to delete this expense record? This action cannot be undone.');">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-sm btn-outline-danger">
+                                        <i class="fa-solid fa-trash me-1"></i> Delete
+                                    </button>
+                                </form>
+                            {% endif %}
+                        </div>
                     </td>
                 </tr>
                 {% empty %}

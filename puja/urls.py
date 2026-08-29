@@ -64,4 +64,10 @@ urlpatterns = [
     
     # Reports
     path('reports/', views.reports_view, name='reports'),
+
+    # Delete Actions & History Log
+    path('donations/<int:pk>/delete/', views.donation_delete, name='donation_delete'),
+    path('expenses/<int:pk>/delete/', views.expense_delete, name='expense_delete'),
+    path('house-donations/<int:pk>/delete/', views.house_donation_delete, name='house_donation_delete'),
+    path('history/', views.history_log_view, name='history_log'),
 ]
