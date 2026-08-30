@@ -4,54 +4,74 @@
 {% block page_title %}Puja Management Dashboard{% endblock %}
 
 {% block content %}
+<!-- Hover style for metrics cards -->
+<style>
+    .card-hover-effect {
+        display: block;
+        transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    }
+    .card-hover-effect:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 8px 15px rgba(0,0,0,0.15) !important;
+    }
+</style>
+
 <!-- Metrics Cards -->
 <div class="row g-4 mb-4">
     <div class="col-md-3">
-        <div class="card bg-primary text-white p-3 h-100">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h6 class="text-uppercase small mb-1">Total Budget</h6>
-                    <h4 class="mb-0">Rs. {{ net_budget }}</h4>
-                    {% if prev_year_balance > 0 %}
-                        <div style="font-size: 0.75rem;" class="opacity-75 mt-1"><i class="fa-solid fa-clock-rotate-left me-1"></i>Incl. Rs. {{ prev_year_balance }} prev.</div>
-                    {% endif %}
+        <a href="{% url 'reports' %}" class="text-decoration-none card-hover-effect h-100">
+            <div class="card bg-primary text-white p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase small mb-1">Total Budget</h6>
+                        <h4 class="mb-0">Rs. {{ net_budget }}</h4>
+                        {% if prev_year_balance > 0 %}
+                            <div style="font-size: 0.75rem;" class="opacity-75 mt-1"><i class="fa-solid fa-clock-rotate-left me-1"></i>Incl. Rs. {{ prev_year_balance }} prev.</div>
+                        {% endif %}
+                    </div>
+                    <i class="fa-solid fa-wallet fa-2x opacity-50"></i>
                 </div>
-                <i class="fa-solid fa-wallet fa-2x opacity-50"></i>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="card bg-success text-white p-3 h-100">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h6 class="text-uppercase small mb-1">General Donations</h6>
-                    <h4 class="mb-0">Rs. {{ total_main_donations }}</h4>
+        <a href="{% url 'donation_list' %}" class="text-decoration-none card-hover-effect h-100">
+            <div class="card bg-success text-white p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase small mb-1">General Donations</h6>
+                        <h4 class="mb-0">Rs. {{ total_main_donations }}</h4>
+                    </div>
+                    <i class="fa-solid fa-hand-holding-dollar fa-2x opacity-50"></i>
                 </div>
-                <i class="fa-solid fa-hand-holding-dollar fa-2x opacity-50"></i>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="card bg-info text-dark p-3 h-100">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h6 class="text-uppercase small mb-1">House Collections</h6>
-                    <h4 class="mb-0">Rs. {{ total_house_donations }}</h4>
+        <a href="{% url 'house_donation_list' %}" class="text-decoration-none card-hover-effect h-100">
+            <div class="card bg-info text-dark p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase small mb-1">House Collections</h6>
+                        <h4 class="mb-0">Rs. {{ total_house_donations }}</h4>
+                    </div>
+                    <i class="fa-solid fa-house-chimney fa-2x opacity-50"></i>
                 </div>
-                <i class="fa-solid fa-house-chimney fa-2x opacity-50"></i>
             </div>
-        </div>
+        </a>
     </div>
     <div class="col-md-3">
-        <div class="card bg-danger text-white p-3 h-100">
-            <div class="d-flex justify-content-between align-items-center">
-                <div>
-                    <h6 class="text-uppercase small mb-1">Expenses</h6>
-                    <h4 class="mb-0">Rs. {{ total_expenses }}</h4>
+        <a href="{% url 'expense_list' %}" class="text-decoration-none card-hover-effect h-100">
+            <div class="card bg-danger text-white p-3 h-100">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase small mb-1">Expenses</h6>
+                        <h4 class="mb-0">Rs. {{ total_expenses }}</h4>
+                    </div>
+                    <i class="fa-solid fa-file-invoice-dollar fa-2x opacity-50"></i>
                 </div>
-                <i class="fa-solid fa-file-invoice-dollar fa-2x opacity-50"></i>
             </div>
-        </div>
+        </a>
     </div>
 </div>
 
