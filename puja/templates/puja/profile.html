@@ -10,7 +10,7 @@
             <div class="mb-3">
                 <i class="fa-solid fa-circle-user text-secondary fa-5x"></i>
             </div>
-            <h4>{{ user.username }}</h4>
+            <h4>{{ user.get_full_name|default:user.username }}</h4>
             <span class="badge bg-warning text-dark mb-2">{{ user.get_role_display }}</span>
             <p class="text-muted mb-1"><i class="fa-solid fa-phone me-1"></i> {{ user.mobile|default:"Not Provided" }}</p>
             <p class="text-muted"><i class="fa-solid fa-envelope me-1"></i> {{ user.email }}</p>
