@@ -145,7 +145,7 @@
                     <h1 class="h3">{% block page_title %}Ganesh Puja Committee{% endblock %}</h1>
                     <div class="btn-toolbar mb-2 mb-md-0">
                         {% if user.is_authenticated %}
-                        <span class="badge bg-secondary p-2"><i class="fa-solid fa-user me-1"></i> Hello, {{ user.username }}</span>
+                        <span class="badge bg-secondary p-2"><i class="fa-solid fa-user me-1"></i> Hello, {{ user.firstname|default:user.username }}</span>
                         {% endif %}
                     </div>
                 </div>
