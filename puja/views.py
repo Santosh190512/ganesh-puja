@@ -1,6 +1,10 @@
 from decimal import Decimal
 from django.shortcuts import render, redirect, get_object_or_404
+from django.http import HttpResponse
 from django.contrib.auth import login, logout, authenticate
+
+def ping_view(request):
+    return HttpResponse("OK", content_type="text/plain")
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Sum, Q

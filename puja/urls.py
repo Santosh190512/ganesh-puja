@@ -70,4 +70,7 @@ urlpatterns = [
     path('expenses/<int:pk>/delete/', views.expense_delete, name='expense_delete'),
     path('house-donations/<int:pk>/delete/', views.house_donation_delete, name='house_donation_delete'),
     path('history/', views.history_log_view, name='history_log'),
+
+    # Lightweight Keep-Alive Ping Endpoint
+    path('ping/', views.ping_view, name='ping'),
 ]
