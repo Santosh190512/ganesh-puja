@@ -18,7 +18,7 @@
                 <tr>
                     <th>Receipt No.</th>
                     <th>Donor Name</th>
-                    <th>Mobile</th>
+                    
                     <th>Amount</th>
                     <th>Method</th>
                     <th>Transaction ID</th>
@@ -40,7 +40,7 @@
                             {% endif %}
                         {% endif %}
                     </td>
-                    <td>{{ donation.donor_mobile|default:"-" }}</td>
+                    
                     <td class="fw-bold text-success">
                         {% if donation.amount > 0 %}
                             Rs. {{ donation.amount }}
