@@ -88,6 +88,16 @@ class Expense(models.Model):
     date_incurred = models.DateField(default=timezone.now)
     bill_file = models.FileField(upload_to='bills/', blank=True, null=True)
     logged_by = models.ForeignKey(CustomUser, on_delete=models.SET_NULL, null=True)
+    order_index = models.PositiveIntegerField(default=0, db_index=True, verbose_name="Display Order")
+
+    class Meta:
+        ordering = ['order_index', 'date_incurred', 'id']
+
+    def save(self, *args, **kwargs):
+        if not self.order_index:
+            max_val = Expense.objects.aggregate(max_val=models.Max('order_index'))['max_val']
+            self.order_index = (max_val or 0) + 1
+        super().save(*args, **kwargs)
 
     def __str__(self):
         return f"{self.get_category_display()} - Rs. {self.amount}"

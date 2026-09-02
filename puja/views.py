@@ -372,13 +372,65 @@ def donation_receipt(request, pk):
 
 # --- EXPENSES ---
 
+def normalize_expense_orders():
+    """
+    Ensures all expenses have unique, sequential order_index numbers (1, 2, 3...)
+    ordered by their current order_index, date_incurred, and id.
+    """
+    expenses = list(Expense.objects.all().order_by('order_index', 'date_incurred', 'id'))
+    for idx, e in enumerate(expenses, start=1):
+        if e.order_index != idx:
+            e.order_index = idx
+            e.save(update_fields=['order_index'])
+
 def expense_list(request):
-    expenses = Expense.objects.all().order_by('-date_incurred')
+    if Expense.objects.filter(order_index=0).exists():
+        normalize_expense_orders()
+
+    expenses = Expense.objects.all().order_by('order_index', 'date_incurred', 'id')
     total_amount = expenses.aggregate(total=Sum('amount'))['total'] or 0
     return render(request, 'puja/expense_list.html', {
         'expenses': expenses,
         'total_amount': total_amount
     })
+
+@login_required
+@admin_only
+def expense_move_up(request, pk):
+    normalize_expense_orders()
+    current_expense = get_object_or_404(Expense, pk=pk)
+    prev_expense = Expense.objects.filter(order_index__lt=current_expense.order_index).order_by('-order_index').first()
+    if prev_expense:
+        current_idx = current_expense.order_index
+        current_expense.order_index = prev_expense.order_index
+        prev_expense.order_index = current_idx
+        current_expense.save(update_fields=['order_index'])
+        prev_expense.save(update_fields=['order_index'])
+        log_action(
+            request.user, 'UPDATE', 'Expense', current_expense.id, str(current_expense),
+            f"Moved expense #{current_expense.id} UP (swapped with #{prev_expense.id})"
+        )
+        messages.success(request, f"Expense '{current_expense.get_category_display()}' moved up.")
+    return redirect('expense_list')
+
+@login_required
+@admin_only
+def expense_move_down(request, pk):
+    normalize_expense_orders()
+    current_expense = get_object_or_404(Expense, pk=pk)
+    next_expense = Expense.objects.filter(order_index__gt=current_expense.order_index).order_by('order_index').first()
+    if next_expense:
+        current_idx = current_expense.order_index
+        current_expense.order_index = next_expense.order_index
+        next_expense.order_index = current_idx
+        current_expense.save(update_fields=['order_index'])
+        next_expense.save(update_fields=['order_index'])
+        log_action(
+            request.user, 'UPDATE', 'Expense', current_expense.id, str(current_expense),
+            f"Moved expense #{current_expense.id} DOWN (swapped with #{next_expense.id})"
+        )
+        messages.success(request, f"Expense '{current_expense.get_category_display()}' moved down.")
+    return redirect('expense_list')
 
 @login_required
 @admin_only
