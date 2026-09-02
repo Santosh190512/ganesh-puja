@@ -7,7 +7,7 @@ def ping_view(request):
     return HttpResponse("OK", content_type="text/plain")
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.db.models import Sum, Q
+from django.db.models import Sum, Q, Count, Max
 from django.utils import timezone
 from .models import (CustomUser, VolunteerTeam, Donation, Expense, VolunteerDuty, 
                      Attendance, PujaEvent, Vendor, Quotation, VendorPayment, 
@@ -432,6 +432,34 @@ def expense_move_down(request, pk):
         messages.success(request, f"Expense '{current_expense.get_category_display()}' moved down.")
     return redirect('expense_list')
 
+def expense_print_report(request):
+    expenses = Expense.objects.all().order_by('order_index', 'date_incurred', 'id')
+    total_amount = expenses.aggregate(total=Sum('amount'))['total'] or Decimal('0.00')
+
+    # Category breakdown for audit summary
+    category_summary = Expense.objects.values('category').annotate(
+        total=Sum('amount'),
+        count=Count('id')
+    ).order_by('-total')
+
+    category_data = []
+    for cat in category_summary:
+        display_name = dict(Expense.CATEGORIES).get(cat['category'], cat['category'])
+        pct = (cat['total'] / total_amount * 100) if total_amount > 0 else 0
+        category_data.append({
+            'name': display_name,
+            'count': cat['count'],
+            'total': cat['total'],
+            'percentage': round(pct, 1)
+        })
+
+    return render(request, 'puja/expense_print_report.html', {
+        'expenses': expenses,
+        'total_amount': total_amount,
+        'category_data': category_data,
+        'generated_date': timezone.localtime(),
+    })
+
 @login_required
 @admin_only
 def expense_add(request):
@@ -751,8 +779,8 @@ def reports_view(request):
     config = PujaConfiguration.objects.first()
     prev_year_balance = Decimal(str(config.previous_year_balance)) if config and config.previous_year_balance else Decimal('0.00')
 
-    donations = Donation.objects.all().order_by('date_received')
-    expenses = Expense.objects.all().order_by('-date_incurred')
+    donations = Donation.objects.all().order_by('order_index', 'date_received', 'id')
+    expenses = Expense.objects.all().order_by('order_index', 'date_incurred', 'id')
     
     total_donations = Decimal(donations.aggregate(total=Sum('amount'))['total'] or '0.00')
     total_expenses = Decimal(expenses.aggregate(total=Sum('amount'))['total'] or '0.00')

@@ -74,6 +74,7 @@ urlpatterns = [
     path('expenses/<int:pk>/edit/', views.expense_edit, name='expense_edit'),
     path('expenses/<int:pk>/move-up/', views.expense_move_up, name='expense_move_up'),
     path('expenses/<int:pk>/move-down/', views.expense_move_down, name='expense_move_down'),
+    path('expenses/print-report/', views.expense_print_report, name='expense_print_report'),
     path('house-donations/<int:pk>/delete/', views.house_donation_delete, name='house_donation_delete'),
     path('house-donations/<int:pk>/edit/', views.house_donation_edit, name='house_donation_edit'),
     path('history/', views.history_log_view, name='history_log'),

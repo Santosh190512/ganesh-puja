@@ -4,6 +4,13 @@
 {% block page_title %}Financial &amp; Operational Reports{% endblock %}
 
 {% block content %}
+<!-- Print Header (Visible only on print) -->
+<div class="d-none d-print-block text-center mb-4">
+    <h2 class="fw-bold mb-1">Ganesh Puja Committee</h2>
+    <p class="mb-1 text-secondary">Dakhina Sahi, Sikharpur, Ganjam</p>
+    <h4 class="fw-bold border-bottom pb-2">Complete Financial Statement Report</h4>
+</div>
+
 <div class="d-flex justify-content-between align-items-center mb-4 no-print">
     <span class="text-muted">Export and analyze complete records of donations, expenses, dues, inventory, and volunteer participation.</span>
     <button onclick="window.print()" class="btn btn-warning text-dark fw-bold"><i class="fa-solid fa-print me-1"></i> Print Statement</button>
@@ -22,6 +29,12 @@
         </div>
         <div class="col-md-3">
         {% else %}
+        <div class="col-md-4">
+            <div class="bg-light p-3 rounded">
+                <span class="text-muted small uppercase">Prev. Year Balance</span>
+                <h3 class="text-primary fw-bold mt-1">Rs. {{ prev_year_balance }}</h3>
+            </div>
+        </div>
         <div class="col-md-4">
         {% endif %}
             <div class="bg-light p-3 rounded">
@@ -54,13 +67,17 @@
 
 <div class="row g-4">
     <!-- Donation Ledger -->
-    <div class="col-md-6">
+    <div class="col-md-6 print-full-width">
         <div class="card p-4 h-100">
-            <h5 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-hand-holding-dollar me-2"></i>Donation Report</h5>
-            <div class="table-responsive" style="max-height: 350px;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-secondary mb-0"><i class="fa-solid fa-hand-holding-dollar me-2"></i>Donation Report</h5>
+                <span class="badge bg-success-subtle text-success border border-success-subtle">Total: Rs. {{ total_donations }}</span>
+            </div>
+            <div class="table-responsive scrollable-ledger">
                 <table class="table table-sm table-striped">
                     <thead>
                         <tr>
+                            <th>#</th>
                             <th>Donor Name</th>
                             <th>Amount</th>
                             <th>Date</th>
@@ -69,6 +86,7 @@
                     <tbody>
                         {% for item in donations %}
                         <tr>
+                            <td><small class="text-muted">{{ forloop.counter }}</small></td>
                             <td>
                                 {% if item.is_anonymous %}Anonymous{% else %}{{ item.donor_name|default:"General Donor" }}{% endif %}
                             </td>
@@ -77,7 +95,7 @@
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="3" class="text-center text-muted">No donations logged.</td>
+                            <td colspan="4" class="text-center text-muted">No donations logged.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -87,13 +105,17 @@
     </div>
 
     <!-- Expense Ledger -->
-    <div class="col-md-6">
+    <div class="col-md-6 print-full-width">
         <div class="card p-4 h-100">
-            <h5 class="fw-bold text-secondary mb-3"><i class="fa-solid fa-file-invoice-dollar me-2"></i>Expense Report</h5>
-            <div class="table-responsive" style="max-height: 350px;">
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <h5 class="fw-bold text-secondary mb-0"><i class="fa-solid fa-file-invoice-dollar me-2"></i>Expense Report</h5>
+                <span class="badge bg-danger-subtle text-danger border border-danger-subtle">Total: Rs. {{ total_expenses }}</span>
+            </div>
+            <div class="table-responsive scrollable-ledger">
                 <table class="table table-sm table-striped">
                     <thead>
                         <tr>
+                            <th>#</th>
                             <th>Category</th>
                             <th>Amount</th>
                             <th>Date</th>
@@ -102,13 +124,14 @@
                     <tbody>
                         {% for item in expenses %}
                         <tr>
+                            <td><small class="text-muted">{{ forloop.counter }}</small></td>
                             <td>{{ item.get_category_display }}</td>
                             <td class="text-danger fw-bold">Rs. {{ item.amount }}</td>
                             <td>{{ item.date_incurred|date:"d M Y" }}</td>
                         </tr>
                         {% empty %}
                         <tr>
-                            <td colspan="3" class="text-center text-muted">No expenses logged.</td>
+                            <td colspan="4" class="text-center text-muted">No expenses logged.</td>
                         </tr>
                         {% endfor %}
                     </tbody>
@@ -122,21 +145,89 @@
 
 
 <style>
+.scrollable-ledger {
+    max-height: 420px;
+    overflow-y: auto;
+}
+
 @media print {
-    .no-print, .sidebar {
+    /* Hide all non-printable UI elements */
+    .no-print,
+    .sidebar,
+    header,
+    nav,
+    footer,
+    .btn {
         display: none !important;
     }
-    .main-content {
-        width: 100% !important;
+
+    /* Page container setup */
+    html, body {
+        background-color: #ffffff !important;
+        font-size: 11pt !important;
+        color: #000000 !important;
         margin: 0 !important;
         padding: 0 !important;
+        width: 100% !important;
     }
-    body {
-        background-color: #fff;
+
+    .main-content {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 !important;
+        padding: 0 10px !important;
     }
-    .card {
+
+    /* Remove scrollbars and allow FULL tables to expand and paginate naturally */
+    .scrollable-ledger,
+    .table-responsive,
+    .table-responsive-sm,
+    .table-responsive-md {
+        max-height: none !important;
+        height: auto !important;
+        overflow: visible !important;
+        display: block !important;
+    }
+
+    /* Cards expansion */
+    .card,
+    .card.h-100 {
         box-shadow: none !important;
         border: 1px solid #dee2e6 !important;
+        height: auto !important;
+        min-height: 0 !important;
+        max-height: none !important;
+        page-break-inside: auto !important;
+        margin-bottom: 20px !important;
+    }
+
+    /* Table layout across pages */
+    table {
+        width: 100% !important;
+        border-collapse: collapse !important;
+        page-break-inside: auto !important;
+    }
+
+    thead {
+        display: table-header-group !important; /* Header repeats on each printed page */
+    }
+
+    tr {
+        page-break-inside: avoid !important;
+        page-break-after: auto !important;
+    }
+
+    th, td {
+        padding: 5px 8px !important;
+        border-bottom: 1px solid #dee2e6 !important;
+    }
+
+    /* Stack tables full width for clean, readable print */
+    .print-full-width {
+        width: 100% !important;
+        flex: 0 0 100% !important;
+        max-width: 100% !important;
+        page-break-inside: auto !important;
     }
 }
 </style>
