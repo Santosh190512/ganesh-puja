@@ -178,7 +178,7 @@ def media_add(request):
 # --- DONATIONS ---
 
 def donation_list(request):
-    donations = Donation.objects.all().order_by('-date_received')
+    donations = Donation.objects.all().order_by('date_received')
     total_amount = donations.aggregate(total=Sum('amount'))['total'] or 0
     return render(request, 'puja/donation_list.html', {
         'donations': donations,

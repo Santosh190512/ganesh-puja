@@ -90,10 +90,12 @@
                         {% endif %}
                     </td>
                 </tr>
+                {% if donation.donor_mobile %}
                 <tr>
                     <th>Mobile Number</th>
-                    <td>{{ donation.donor_mobile|default:"-" }}</td>
+                    <td>{{ donation.donor_mobile }}</td>
                 </tr>
+                {% endif %}
                 {% if donation.house_number %}
                 <tr>
                     <th>House Holder Name</th>

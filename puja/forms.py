@@ -28,10 +28,9 @@ class UserProfileForm(forms.ModelForm):
 class DonationForm(forms.ModelForm):
     class Meta:
         model = Donation
-        fields = ('donor_name', 'donor_mobile', 'amount', 'payment_method', 'transaction_id', 'is_anonymous', 'receipt_file', 'material_description')
+        fields = ('donor_name', 'amount', 'payment_method', 'transaction_id', 'is_anonymous', 'receipt_file', 'material_description')
         widgets = {
             'donor_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Donor Name / Owner Name'}),
-            
             'amount': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Amount in Rs. (Optional for material donations)'}),
             'payment_method': forms.Select(attrs={'class': 'form-control'}),
             'transaction_id': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Transaction ID (Optional)'}),

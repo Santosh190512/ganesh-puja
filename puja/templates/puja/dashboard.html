@@ -39,7 +39,7 @@
             <div class="card bg-success text-white p-3 h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-uppercase small mb-1">General Donations</h6>
+                        <h6 class="text-uppercase small mb-1">Donations</h6>
                         <h4 class="mb-0">Rs. {{ total_main_donations }}</h4>
                     </div>
                     <i class="fa-solid fa-hand-holding-dollar fa-2x opacity-50"></i>
@@ -48,14 +48,14 @@
         </a>
     </div>
     <div class="col-md-3">
-        <a href="{% url 'house_donation_list' %}" class="text-decoration-none card-hover-effect h-100">
+        <a href="{% url 'reports' %}" class="text-decoration-none card-hover-effect h-100">
             <div class="card bg-info text-dark p-3 h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
-                        <h6 class="text-uppercase small mb-1">House Collections</h6>
-                        <h4 class="mb-0">Rs. {{ total_house_donations }}</h4>
+                        <h6 class="text-uppercase small mb-1">Previous Year Amount</h6>
+                        <h4 class="mb-0">Rs. {{ prev_year_balance }}</h4>
                     </div>
-                    <i class="fa-solid fa-house-chimney fa-2x opacity-50"></i>
+                    <i class="fa-solid fa-clock-rotate-left fa-2x opacity-50"></i>
                 </div>
             </div>
         </a>

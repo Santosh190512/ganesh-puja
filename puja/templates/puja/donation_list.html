@@ -18,10 +18,8 @@
                 <tr>
                     <th>Receipt No.</th>
                     <th>Donor Name</th>
-                    
                     <th>Amount</th>
                     <th>Method</th>
-                    <th>Transaction ID</th>
                     <th>Date</th>
                     <th>Actions</th>
                 </tr>
@@ -40,7 +38,6 @@
                             {% endif %}
                         {% endif %}
                     </td>
-                    
                     <td class="fw-bold text-success">
                         {% if donation.amount > 0 %}
                             Rs. {{ donation.amount }}
@@ -50,7 +47,6 @@
                         {% endif %}
                     </td>
                     <td><span class="badge bg-info text-dark">{{ donation.get_payment_method_display }}</span></td>
-                    <td>{{ donation.transaction_id|default:"-" }}</td>
                     <td>{{ donation.date_received|date:"d M Y H:i" }}</td>
                     <td>
                         <div class="d-flex gap-1">
