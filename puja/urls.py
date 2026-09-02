@@ -68,6 +68,8 @@ urlpatterns = [
     # Delete & Edit Actions & History Log
     path('donations/<int:pk>/delete/', views.donation_delete, name='donation_delete'),
     path('donations/<int:pk>/edit/', views.donation_edit, name='donation_edit'),
+    path('donations/<int:pk>/move-up/', views.donation_move_up, name='donation_move_up'),
+    path('donations/<int:pk>/move-down/', views.donation_move_down, name='donation_move_down'),
     path('expenses/<int:pk>/delete/', views.expense_delete, name='expense_delete'),
     path('expenses/<int:pk>/edit/', views.expense_edit, name='expense_edit'),
     path('house-donations/<int:pk>/delete/', views.house_donation_delete, name='house_donation_delete'),

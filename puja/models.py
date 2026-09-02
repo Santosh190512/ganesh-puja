@@ -51,10 +51,17 @@ class Donation(models.Model):
 
     receipt_file = models.FileField(upload_to='donations/', blank=True, null=True)
     material_description = models.CharField(max_length=255, blank=True, null=True, help_text="e.g. 50kg Rice, 20kg Potato")
+    order_index = models.PositiveIntegerField(default=0, db_index=True, verbose_name="Display Order")
+
+    class Meta:
+        ordering = ['order_index', 'date_received', 'id']
 
     def save(self, *args, **kwargs):
         if not self.receipt_number:
             self.receipt_number = f"REC-{uuid.uuid4().hex[:8].upper()}"
+        if not self.order_index:
+            max_val = Donation.objects.aggregate(max_val=models.Max('order_index'))['max_val']
+            self.order_index = (max_val or 0) + 1
         super().save(*args, **kwargs)
 
     def __str__(self):

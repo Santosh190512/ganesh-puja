@@ -256,13 +256,65 @@ def media_add(request):
 
 # --- DONATIONS ---
 
+def normalize_donation_orders():
+    """
+    Ensures all donations have unique, sequential order_index numbers (1, 2, 3...)
+    ordered by their current order_index, date_received, and id.
+    """
+    donations = list(Donation.objects.all().order_by('order_index', 'date_received', 'id'))
+    for idx, d in enumerate(donations, start=1):
+        if d.order_index != idx:
+            d.order_index = idx
+            d.save(update_fields=['order_index'])
+
 def donation_list(request):
-    donations = Donation.objects.all().order_by('date_received')
+    if Donation.objects.filter(order_index=0).exists():
+        normalize_donation_orders()
+
+    donations = Donation.objects.all().order_by('order_index', 'date_received', 'id')
     total_amount = donations.aggregate(total=Sum('amount'))['total'] or 0
     return render(request, 'puja/donation_list.html', {
         'donations': donations,
         'total_amount': total_amount
     })
+
+@login_required
+@admin_only
+def donation_move_up(request, pk):
+    normalize_donation_orders()
+    current_donation = get_object_or_404(Donation, pk=pk)
+    prev_donation = Donation.objects.filter(order_index__lt=current_donation.order_index).order_by('-order_index').first()
+    if prev_donation:
+        current_idx = current_donation.order_index
+        current_donation.order_index = prev_donation.order_index
+        prev_donation.order_index = current_idx
+        current_donation.save(update_fields=['order_index'])
+        prev_donation.save(update_fields=['order_index'])
+        log_action(
+            request.user, 'UPDATE', 'Donation', current_donation.id, str(current_donation),
+            f"Moved donation #{current_donation.receipt_number} UP (swapped with #{prev_donation.receipt_number})"
+        )
+        messages.success(request, f"Donation #{current_donation.receipt_number} moved up.")
+    return redirect('donation_list')
+
+@login_required
+@admin_only
+def donation_move_down(request, pk):
+    normalize_donation_orders()
+    current_donation = get_object_or_404(Donation, pk=pk)
+    next_donation = Donation.objects.filter(order_index__gt=current_donation.order_index).order_by('order_index').first()
+    if next_donation:
+        current_idx = current_donation.order_index
+        current_donation.order_index = next_donation.order_index
+        next_donation.order_index = current_idx
+        current_donation.save(update_fields=['order_index'])
+        next_donation.save(update_fields=['order_index'])
+        log_action(
+            request.user, 'UPDATE', 'Donation', current_donation.id, str(current_donation),
+            f"Moved donation #{current_donation.receipt_number} DOWN (swapped with #{next_donation.receipt_number})"
+        )
+        messages.success(request, f"Donation #{current_donation.receipt_number} moved down.")
+    return redirect('donation_list')
 
 @login_required
 @admin_only

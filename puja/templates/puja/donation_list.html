@@ -16,6 +16,9 @@
         <table class="table table-striped table-hover align-middle">
             <thead>
                 <tr>
+                    {% if user.is_authenticated and user.role == 'SUPER_ADMIN' or user.is_superuser %}
+                        <th style="width: 90px;" class="text-center">Order</th>
+                    {% endif %}
                     <th>Receipt No.</th>
                     <th>Donor Name</th>
                     <th>Amount</th>
@@ -27,6 +30,37 @@
             <tbody>
                 {% for donation in donations %}
                 <tr>
+                    {% if user.is_authenticated and user.role == 'SUPER_ADMIN' or user.is_superuser %}
+                    <td class="text-center">
+                        <div class="btn-group btn-group-sm" role="group">
+                            {% if not forloop.first %}
+                                <form action="{% url 'donation_move_up' donation.pk %}" method="POST" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm py-0 px-2" title="Move Up (Upar karein)">
+                                        <i class="fa-solid fa-arrow-up"></i>
+                                    </button>
+                                </form>
+                            {% else %}
+                                <button class="btn btn-outline-secondary btn-sm py-0 px-2 disabled" disabled title="Already at top">
+                                    <i class="fa-solid fa-arrow-up opacity-25"></i>
+                                </button>
+                            {% endif %}
+
+                            {% if not forloop.last %}
+                                <form action="{% url 'donation_move_down' donation.pk %}" method="POST" class="d-inline">
+                                    {% csrf_token %}
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm py-0 px-2" title="Move Down (Neeche karein)">
+                                        <i class="fa-solid fa-arrow-down"></i>
+                                    </button>
+                                </form>
+                            {% else %}
+                                <button class="btn btn-outline-secondary btn-sm py-0 px-2 disabled" disabled title="Already at bottom">
+                                    <i class="fa-solid fa-arrow-down opacity-25"></i>
+                                </button>
+                            {% endif %}
+                        </div>
+                    </td>
+                    {% endif %}
                     <td><code>{{ donation.receipt_number }}</code></td>
                     <td>
                         {% if donation.is_anonymous %}
