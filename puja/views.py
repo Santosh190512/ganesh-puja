@@ -155,7 +155,13 @@ def dashboard_view(request):
     prev_year_balance = fin['prev_year_balance']
     total_donations = fin['current_year_donations'] if fin['current_year_donations'] > 0 else fin['all_time_donations']
     total_expenses = fin['current_year_expenses'] if fin['current_year_expenses'] > 0 else fin['all_time_expenses']
-    net_budget = fin['current_net_budget']
+
+    # Total Budget = Total Collections (Donations) + Previous Year Money
+    total_budget = prev_year_balance + total_donations
+
+    # Remaining Money = Total Budget - Expenses
+    remaining_money = total_budget - total_expenses
+    net_budget = remaining_money
 
     pending_tasks_count = VolunteerDuty.objects.filter(status='PENDING').count()
     volunteers_count = CustomUser.objects.filter(role='NORMAL_VOLUNTEER').count()
@@ -171,7 +177,10 @@ def dashboard_view(request):
     recent_donations = Donation.objects.all().order_by('-date_received')[:5]
 
     context = {
+        'total_budget': total_budget,
+        'remaining_money': remaining_money,
         'total_donations': total_donations,
+        'total_main_donations': total_donations,
         'total_expenses': total_expenses,
         'net_budget': net_budget,
         'prev_year_balance': prev_year_balance,

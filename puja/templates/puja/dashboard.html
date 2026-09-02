@@ -17,58 +17,82 @@
 </style>
 
 <!-- Metrics Cards -->
-<div class="row g-4 mb-4">
-    <div class="col-md-3">
+<div class="row row-cols-1 row-cols-sm-2 row-cols-lg-5 g-3 mb-4">
+    <!-- 1. Total Budget (Donations + Previous Year) -->
+    <div class="col">
         <a href="{% url 'reports' %}" class="text-decoration-none card-hover-effect h-100">
             <div class="card bg-primary text-white p-3 h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-uppercase small mb-1">Total Budget</h6>
-                        <h4 class="mb-0">Rs. {{ net_budget }}</h4>
-                        {% if prev_year_balance > 0 %}
-                            <div style="font-size: 0.75rem;" class="opacity-75 mt-1"><i class="fa-solid fa-clock-rotate-left me-1"></i>Incl. Rs. {{ prev_year_balance }} prev.</div>
-                        {% endif %}
+                        <h4 class="mb-0">Rs. {{ total_budget }}</h4>
+                        <div style="font-size: 0.75rem;" class="opacity-75 mt-1">Donations + Prev. Year</div>
                     </div>
                     <i class="fa-solid fa-wallet fa-2x opacity-50"></i>
                 </div>
             </div>
         </a>
     </div>
-    <div class="col-md-3">
+
+    <!-- 2. Donations (Collections) -->
+    <div class="col">
         <a href="{% url 'donation_list' %}" class="text-decoration-none card-hover-effect h-100">
             <div class="card bg-success text-white p-3 h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-uppercase small mb-1">Donations</h6>
-                        <h4 class="mb-0">Rs. {{ total_main_donations }}</h4>
+                        <h4 class="mb-0">Rs. {{ total_donations }}</h4>
+                        <div style="font-size: 0.75rem;" class="opacity-75 mt-1">Total Collections</div>
                     </div>
                     <i class="fa-solid fa-hand-holding-dollar fa-2x opacity-50"></i>
                 </div>
             </div>
         </a>
     </div>
-    <div class="col-md-3">
+
+    <!-- 3. Previous Year Money -->
+    <div class="col">
         <a href="{% url 'previous_year_money' %}" class="text-decoration-none card-hover-effect h-100">
             <div class="card bg-info text-dark p-3 h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-uppercase small mb-1">Previous Year Money</h6>
                         <h4 class="mb-0">Rs. {{ prev_year_balance }}</h4>
+                        <div style="font-size: 0.75rem;" class="text-muted mt-1">Carried Forward</div>
                     </div>
                     <i class="fa-solid fa-clock-rotate-left fa-2x opacity-50"></i>
                 </div>
             </div>
         </a>
     </div>
-    <div class="col-md-3">
+
+    <!-- 4. Expenses -->
+    <div class="col">
         <a href="{% url 'expense_list' %}" class="text-decoration-none card-hover-effect h-100">
             <div class="card bg-danger text-white p-3 h-100">
                 <div class="d-flex justify-content-between align-items-center">
                     <div>
                         <h6 class="text-uppercase small mb-1">Expenses</h6>
                         <h4 class="mb-0">Rs. {{ total_expenses }}</h4>
+                        <div style="font-size: 0.75rem;" class="opacity-75 mt-1">Total Spent</div>
                     </div>
                     <i class="fa-solid fa-file-invoice-dollar fa-2x opacity-50"></i>
+                </div>
+            </div>
+        </a>
+    </div>
+
+    <!-- 5. Remaining Money (Budget - Expenses) -->
+    <div class="col">
+        <a href="{% url 'reports' %}" class="text-decoration-none card-hover-effect h-100">
+            <div class="card bg-dark text-white p-3 h-100 border-start border-4 border-warning">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h6 class="text-uppercase small mb-1 text-warning">Remaining Money</h6>
+                        <h4 class="mb-0 text-white">Rs. {{ remaining_money }}</h4>
+                        <div style="font-size: 0.75rem;" class="opacity-75 mt-1">Budget - Expenses</div>
+                    </div>
+                    <i class="fa-solid fa-vault fa-2x text-warning opacity-75"></i>
                 </div>
             </div>
         </a>
