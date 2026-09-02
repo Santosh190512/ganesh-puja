@@ -44,7 +44,7 @@
                         {% endif %}
                     </td>
                     <td><span class="badge bg-info text-dark">{{ donation.get_payment_method_display }}</span></td>
-                    <td>{{ donation.date_received|date:"d M Y H:i" }}</td>
+                    <td>{{ donation.date_received|date:"d M Y" }}</td>
                     <td>
                         <div class="d-flex gap-1">
                             <a href="{% url 'donation_receipt' donation.pk %}" class="btn btn-sm btn-outline-primary" target="_blank">

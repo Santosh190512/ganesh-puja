@@ -37,7 +37,10 @@ class DonationForm(forms.ModelForm):
             'is_anonymous': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'receipt_file': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': 'image/*', 'capture': 'environment'}),
             'material_description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 50kg Rice, 20kg Potato (For In-Kind donations)'}),
-            'date_received': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),
+            'date_received': forms.DateInput(attrs={'class': 'form-control', 'type': 'date'}, format='%Y-%m-%d'),
+        }
+        labels = {
+            'date_received': 'Donation Date',
         }
 
     def __init__(self, *args, **kwargs):
@@ -47,9 +50,9 @@ class DonationForm(forms.ModelForm):
         self.fields['date_received'].required = False
         from django.utils import timezone
         if not self.instance.pk and 'date_received' not in self.initial:
-            self.initial['date_received'] = timezone.localtime().strftime('%Y-%m-%dT%H:%M')
+            self.initial['date_received'] = timezone.localdate().strftime('%Y-%m-%d')
         elif self.instance.pk and self.instance.date_received:
-            self.initial['date_received'] = timezone.localtime(self.instance.date_received).strftime('%Y-%m-%dT%H:%M')
+            self.initial['date_received'] = timezone.localtime(self.instance.date_received).strftime('%Y-%m-%d')
 
 class HouseDonationForm(forms.ModelForm):
     class Meta:
