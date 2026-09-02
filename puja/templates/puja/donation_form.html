@@ -1,13 +1,13 @@
 {% extends 'puja/base.html' %}
 
-{% block title %}Log Donation - Ganesh Puja Portal{% endblock %}
-{% block page_title %}Log New Donation{% endblock %}
+{% block title %}{% if form.instance.pk %}Edit Donation{% else %}Log Donation{% endif %} - Ganesh Puja Portal{% endblock %}
+{% block page_title %}{% if form.instance.pk %}Edit Donation{% else %}Log New Donation{% endif %}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-6">
         <div class="card p-4">
-            <h4 class="card-title mb-4"><i class="fa-solid fa-hand-holding-dollar text-warning me-2"></i>New Donation Form</h4>
+            <h4 class="card-title mb-4"><i class="fa-solid fa-hand-holding-dollar text-warning me-2"></i>{% if form.instance.pk %}Edit Donation Details{% else %}New Donation Form{% endif %}</h4>
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 {% for field in form %}
@@ -28,7 +28,7 @@
                         {% endfor %}
                     </div>
                 {% endfor %}
-                <button type="submit" class="btn btn-warning text-dark fw-bold w-100 mt-3">Log Donation</button>
+                <button type="submit" class="btn btn-warning text-dark fw-bold w-100 mt-3">{% if form.instance.pk %}Update Donation{% else %}Log Donation{% endif %}</button>
             </form>
         </div>
     </div>

@@ -90,8 +90,8 @@
                         </a>
                     </li>
                     <li class="nav-item">
-                        <a class="nav-link {% if 'house' in request.path %}active{% endif %}" href="{% url 'house_donation_list' %}">
-                            <i class="fa-solid fa-house-chimney-user me-2"></i> House-wise Collection
+                        <a class="nav-link {% if 'previous-year' in request.path %}active{% endif %}" href="{% url 'previous_year_money' %}">
+                            <i class="fa-solid fa-clock-rotate-left me-2"></i> Previous Year Money
                         </a>
                     </li>
                     <li class="nav-item">
@@ -104,12 +104,14 @@
                             <i class="fa-solid fa-chart-pie me-2"></i> Reports
                         </a>
                     </li>
-                    {% if user.is_authenticated and user.role == 'SUPER_ADMIN' or user.is_superuser %}
-                    <li class="nav-item">
-                        <a class="nav-link {% if 'history' in request.path %}active{% endif %}" href="{% url 'history_log' %}">
-                            <i class="fa-solid fa-clock-rotate-left me-2"></i> History Log
-                        </a>
-                    </li>
+                    {% if user.is_authenticated %}
+                        {% if user.role == 'SUPER_ADMIN' or user.is_superuser %}
+                        <li class="nav-item">
+                            <a class="nav-link {% if 'history' in request.path %}active{% endif %}" href="{% url 'history_log' %}">
+                                <i class="fa-solid fa-clock-rotate-left me-2"></i> History Log
+                            </a>
+                        </li>
+                        {% endif %}
                     {% endif %}
                     <hr class="text-secondary">
                     {% if user.is_authenticated %}

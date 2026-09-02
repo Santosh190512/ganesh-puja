@@ -16,7 +16,7 @@ from .models import (CustomUser, VolunteerTeam, Donation, Expense, VolunteerDuty
 from .forms import (CustomUserCreationForm, UserProfileForm, DonationForm, HouseDonationForm, ExpenseForm, 
                     VolunteerTeamForm, DutyAssignmentForm, EventForm, InventoryItemForm, 
                     StockTransactionForm, VendorForm, QuotationForm, VendorPaymentForm, 
-                    PrasadPlannerForm, AnnouncementForm, GalleryAlbumForm, GalleryMediaForm)
+                    PrasadPlannerForm, AnnouncementForm, GalleryAlbumForm, GalleryMediaForm, PreviousYearMoneyForm)
 from .decorators import role_required, admin_only
 
 def log_action(user, action_type, model_name, object_id, object_repr, details=""):
@@ -75,17 +75,87 @@ def profile_view(request):
     return render(request, 'puja/profile.html', {'form': form})
 
 
+# --- FINANCIAL YEAR CALCULATION HELPER ---
+
+def get_yearly_financials(target_year=None):
+    """
+    Computes year-by-year financial history:
+    Starting from the earliest year of donation/expense or base config year up to current year.
+    Each year's remaining balance automatically becomes the opening / previous year balance of the next year.
+    """
+    current_calendar_year = timezone.now().year
+    if not target_year:
+        target_year = current_calendar_year
+
+    config = PujaConfiguration.objects.first()
+    base_balance = Decimal(str(config.previous_year_balance)) if config and config.previous_year_balance else Decimal('0.00')
+
+    # Gather distinct years
+    donation_years = Donation.objects.dates('date_received', 'year')
+    expense_years = Expense.objects.dates('date_incurred', 'year')
+    years_set = {d.year for d in donation_years} | {e.year for e in expense_years}
+    years_set.add(target_year)
+    years_set.add(target_year - 1)
+
+    sorted_years = sorted(list(years_set))
+
+    year_records = []
+    running_balance = base_balance
+
+    for idx, yr in enumerate(sorted_years):
+        yr_donations = Decimal(Donation.objects.filter(date_received__year=yr).aggregate(total=Sum('amount'))['total'] or '0.00')
+        yr_expenses = Decimal(Expense.objects.filter(date_incurred__year=yr).aggregate(total=Sum('amount'))['total'] or '0.00')
+        
+        opening = running_balance
+        closing = opening + yr_donations - yr_expenses
+
+        year_records.append({
+            'year': yr,
+            'opening_balance': opening,
+            'donations': yr_donations,
+            'expenses': yr_expenses,
+            'closing_balance': closing,
+            'is_current': (yr == target_year)
+        })
+        running_balance = closing
+
+    target_record = next((r for r in year_records if r['year'] == target_year), None)
+    if target_record:
+        prev_year_balance_for_target = target_record['opening_balance']
+        current_year_donations = target_record['donations']
+        current_year_expenses = target_record['expenses']
+        current_net_budget = target_record['closing_balance']
+    else:
+        prev_year_balance_for_target = base_balance
+        current_year_donations = Decimal('0.00')
+        current_year_expenses = Decimal('0.00')
+        current_net_budget = prev_year_balance_for_target
+
+    all_time_donations = Decimal(Donation.objects.aggregate(total=Sum('amount'))['total'] or '0.00')
+    all_time_expenses = Decimal(Expense.objects.aggregate(total=Sum('amount'))['total'] or '0.00')
+
+    return {
+        'target_year': target_year,
+        'prev_year_name': target_year - 1,
+        'prev_year_balance': prev_year_balance_for_target,
+        'current_year_donations': current_year_donations,
+        'current_year_expenses': current_year_expenses,
+        'current_net_budget': current_net_budget,
+        'all_time_donations': all_time_donations,
+        'all_time_expenses': all_time_expenses,
+        'year_records': year_records,
+        'base_balance': base_balance,
+    }
+
+
 # --- DASHBOARD ---
 
 def dashboard_view(request):
-    config = PujaConfiguration.objects.first()
-    prev_year_balance = Decimal(str(config.previous_year_balance)) if config and config.previous_year_balance else Decimal('0.00')
-
-    total_main_donations = Decimal(Donation.objects.aggregate(total=Sum('amount'))['total'] or '0.00')
-    total_house_donations = Decimal(HouseDonation.objects.aggregate(total=Sum('amount'))['total'] or '0.00')
-    total_donations = total_main_donations + total_house_donations
-    total_expenses = Decimal(Expense.objects.aggregate(total=Sum('amount'))['total'] or '0.00')
-    net_budget = prev_year_balance + total_donations - total_expenses
+    fin = get_yearly_financials()
+    prev_year_balance = fin['prev_year_balance']
+    total_donations = fin['current_year_donations'] if fin['current_year_donations'] > 0 else fin['all_time_donations']
+    total_expenses = fin['current_year_expenses'] if fin['current_year_expenses'] > 0 else fin['all_time_expenses']
+    net_budget = fin['current_net_budget']
 
     pending_tasks_count = VolunteerDuty.objects.filter(status='PENDING').count()
     volunteers_count = CustomUser.objects.filter(role='NORMAL_VOLUNTEER').count()
@@ -102,11 +172,11 @@ def dashboard_view(request):
 
     context = {
         'total_donations': total_donations,
-        'total_main_donations': total_main_donations,
-        'total_house_donations': total_house_donations,
         'total_expenses': total_expenses,
         'net_budget': net_budget,
         'prev_year_balance': prev_year_balance,
+        'target_year': fin['target_year'],
+        'prev_year_name': fin['prev_year_name'],
         'pending_tasks_count': pending_tasks_count,
         'volunteers_count': volunteers_count,
         'upcoming_events': upcoming_events,
@@ -568,14 +638,10 @@ def reports_view(request):
     config = PujaConfiguration.objects.first()
     prev_year_balance = Decimal(str(config.previous_year_balance)) if config and config.previous_year_balance else Decimal('0.00')
 
-    donations = Donation.objects.all().order_by('-date_received')
-    house_donations = HouseDonation.objects.all().order_by('-date_received')
+    donations = Donation.objects.all().order_by('date_received')
     expenses = Expense.objects.all().order_by('-date_incurred')
     
-    total_main_donations = Decimal(donations.aggregate(total=Sum('amount'))['total'] or '0.00')
-    total_house_donations = Decimal(house_donations.aggregate(total=Sum('amount'))['total'] or '0.00')
-    total_donations = total_main_donations + total_house_donations
-    
+    total_donations = Decimal(donations.aggregate(total=Sum('amount'))['total'] or '0.00')
     total_expenses = Decimal(expenses.aggregate(total=Sum('amount'))['total'] or '0.00')
     net_balance = prev_year_balance + total_donations - total_expenses
     
@@ -587,10 +653,7 @@ def reports_view(request):
     
     context = {
         'donations': donations,
-        'house_donations': house_donations,
         'expenses': expenses,
-        'total_main_donations': total_main_donations,
-        'total_house_donations': total_house_donations,
         'total_donations': total_donations,
         'total_expenses': total_expenses,
         'net_balance': net_balance,
@@ -677,6 +740,96 @@ def house_donation_delete(request, pk):
 
 @login_required
 @admin_only
+def donation_edit(request, pk):
+    donation = get_object_or_404(Donation, pk=pk)
+    if request.method == 'POST':
+        form = DonationForm(request.POST, request.FILES, instance=donation)
+        if form.is_valid():
+            donation = form.save()
+            log_action(
+                request.user, 'UPDATE', 'Donation', donation.id, str(donation),
+                f"Updated Amount: Rs. {donation.amount}, Donor: {donation.donor_name or 'Anonymous'}, Date: {donation.date_received}"
+            )
+            messages.success(request, f"Donation #{donation.receipt_number} updated successfully!")
+            return redirect('donation_list')
+    else:
+        form = DonationForm(instance=donation)
+    return render(request, 'puja/donation_form.html', {'form': form, 'is_edit': True})
+
+@login_required
+@admin_only
+def expense_edit(request, pk):
+    expense = get_object_or_404(Expense, pk=pk)
+    if request.method == 'POST':
+        form = ExpenseForm(request.POST, request.FILES, instance=expense)
+        if form.is_valid():
+            expense = form.save()
+            log_action(
+                request.user, 'UPDATE', 'Expense', expense.id, str(expense),
+                f"Updated Amount: Rs. {expense.amount}, Category: {expense.get_category_display()}, Desc: {expense.description}"
+            )
+            messages.success(request, "Expense record updated successfully!")
+            return redirect('expense_list')
+    else:
+        form = ExpenseForm(instance=expense)
+    return render(request, 'puja/expense_form.html', {'form': form, 'is_edit': True})
+
+@login_required
+@admin_only
+def house_donation_edit(request, pk):
+    donation = get_object_or_404(HouseDonation, pk=pk)
+    if request.method == 'POST':
+        form = HouseDonationForm(request.POST, instance=donation)
+        if form.is_valid():
+            donation = form.save()
+            log_action(
+                request.user, 'UPDATE', 'HouseDonation', donation.id, str(donation),
+                f"Updated Amount: Rs. {donation.amount}, Owner: {donation.owner_name}, House: {donation.house_no or '-'}"
+            )
+            messages.success(request, "House collection record updated successfully!")
+            return redirect('house_donation_list')
+    else:
+        form = HouseDonationForm(instance=donation)
+    return render(request, 'puja/house_donation_form.html', {'form': form, 'is_edit': True})
+
+@login_required
+@admin_only
 def history_log_view(request):
     logs = AuditLog.objects.all().order_by('-timestamp').select_related('user')
     return render(request, 'puja/history_log.html', {'logs': logs})
+
+def previous_year_money_view(request):
+    config = PujaConfiguration.objects.first()
+    if not config:
+        config = PujaConfiguration.objects.create(
+            previous_year_balance=Decimal('0.00')
+        )
+
+    if request.method == 'POST':
+        if not (request.user.is_authenticated and (request.user.role == 'SUPER_ADMIN' or request.user.is_superuser)):
+            messages.error(request, "Only Administrators can update the previous year balance.")
+            return redirect('previous_year_money')
+
+        form = PreviousYearMoneyForm(request.POST, instance=config)
+        if form.is_valid():
+            config = form.save()
+            log_action(
+                request.user, 'UPDATE', 'PujaConfiguration', config.id, str(config),
+                f"Updated Previous Year Balance to: Rs. {config.previous_year_balance}"
+            )
+            messages.success(request, f"Previous year balance updated to Rs. {config.previous_year_balance} successfully!")
+            return redirect('previous_year_money')
+    else:
+        form = PreviousYearMoneyForm(instance=config)
+
+    fin = get_yearly_financials()
+
+    return render(request, 'puja/previous_year_money.html', {
+        'config': config,
+        'form': form,
+        'fin': fin,
+        'prev_year_balance': fin['prev_year_balance'],
+        'target_year': fin['target_year'],
+        'prev_year_name': fin['prev_year_name'],
+        'year_records': fin['year_records'],
+    })

@@ -65,11 +65,17 @@ urlpatterns = [
     # Reports
     path('reports/', views.reports_view, name='reports'),
 
-    # Delete Actions & History Log
+    # Delete & Edit Actions & History Log
     path('donations/<int:pk>/delete/', views.donation_delete, name='donation_delete'),
+    path('donations/<int:pk>/edit/', views.donation_edit, name='donation_edit'),
     path('expenses/<int:pk>/delete/', views.expense_delete, name='expense_delete'),
+    path('expenses/<int:pk>/edit/', views.expense_edit, name='expense_edit'),
     path('house-donations/<int:pk>/delete/', views.house_donation_delete, name='house_donation_delete'),
+    path('house-donations/<int:pk>/edit/', views.house_donation_edit, name='house_donation_edit'),
     path('history/', views.history_log_view, name='history_log'),
+
+    # Previous Year Money Entry & View
+    path('previous-year-money/', views.previous_year_money_view, name='previous_year_money'),
 
     # Lightweight Keep-Alive Ping Endpoint
     path('ping/', views.ping_view, name='ping'),

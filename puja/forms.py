@@ -3,7 +3,7 @@ from django.contrib.auth.forms import UserCreationForm
 from .models import (CustomUser, VolunteerTeam, Donation, Expense, VolunteerDuty, 
                      Attendance, PujaEvent, Vendor, Quotation, VendorPayment, 
                      InventoryItem, StockTransaction, PrasadPlanner, Announcement, 
-                     GalleryAlbum, GalleryMedia, HouseDonation)
+                     GalleryAlbum, GalleryMedia, HouseDonation, PujaConfiguration)
 
 class CustomUserCreationForm(UserCreationForm):
     class Meta(UserCreationForm.Meta):
@@ -28,7 +28,7 @@ class UserProfileForm(forms.ModelForm):
 class DonationForm(forms.ModelForm):
     class Meta:
         model = Donation
-        fields = ('donor_name', 'amount', 'payment_method', 'transaction_id', 'is_anonymous', 'receipt_file', 'material_description')
+        fields = ('donor_name', 'amount', 'payment_method', 'transaction_id', 'is_anonymous', 'receipt_file', 'material_description', 'date_received')
         widgets = {
             'donor_name': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Enter Donor Name / Owner Name'}),
             'amount': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Amount in Rs. (Optional for material donations)'}),
@@ -37,12 +37,19 @@ class DonationForm(forms.ModelForm):
             'is_anonymous': forms.CheckboxInput(attrs={'class': 'form-check-input'}),
             'receipt_file': forms.ClearableFileInput(attrs={'class': 'form-control', 'accept': 'image/*', 'capture': 'environment'}),
             'material_description': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'e.g. 50kg Rice, 20kg Potato (For In-Kind donations)'}),
+            'date_received': forms.DateTimeInput(attrs={'class': 'form-control', 'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M'),
         }
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.fields['amount'].required = False
         self.fields['material_description'].required = False
+        self.fields['date_received'].required = False
+        from django.utils import timezone
+        if not self.instance.pk and 'date_received' not in self.initial:
+            self.initial['date_received'] = timezone.localtime().strftime('%Y-%m-%dT%H:%M')
+        elif self.instance.pk and self.instance.date_received:
+            self.initial['date_received'] = timezone.localtime(self.instance.date_received).strftime('%Y-%m-%dT%H:%M')
 
 class HouseDonationForm(forms.ModelForm):
     class Meta:
@@ -201,4 +208,15 @@ class GalleryMediaForm(forms.ModelForm):
             'album': forms.Select(attrs={'class': 'form-control'}),
             'file': forms.ClearableFileInput(attrs={'class': 'form-control'}),
             'caption': forms.TextInput(attrs={'class': 'form-control', 'placeholder': 'Caption (Optional)'}),
+        }
+
+class PreviousYearMoneyForm(forms.ModelForm):
+    class Meta:
+        model = PujaConfiguration
+        fields = ('previous_year_balance',)
+        labels = {
+            'previous_year_balance': 'Previous Year Carried Forward Amount (Rs.)',
+        }
+        widgets = {
+            'previous_year_balance': forms.NumberInput(attrs={'class': 'form-control', 'placeholder': 'Enter previous year balance in Rs.', 'step': '0.01'}),
         }

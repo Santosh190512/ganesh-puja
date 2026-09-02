@@ -1,13 +1,13 @@
 {% extends 'puja/base.html' %}
 
-{% block title %}Log House-wise Collection - Ganesh Puja Portal{% endblock %}
-{% block page_title %}Log House-wise Collection{% endblock %}
+{% block title %}{% if form.instance.pk %}Edit House Collection{% else %}Log House-wise Collection{% endif %} - Ganesh Puja Portal{% endblock %}
+{% block page_title %}{% if form.instance.pk %}Edit House Collection{% else %}Log House-wise Collection{% endif %}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-6">
         <div class="card p-4">
-            <h4 class="card-title mb-4"><i class="fa-solid fa-house-chimney-user text-warning me-2"></i>House-wise Collection Form</h4>
+            <h4 class="card-title mb-4"><i class="fa-solid fa-house-chimney-user text-warning me-2"></i>{% if form.instance.pk %}Edit House Collection{% else %}House-wise Collection Form{% endif %}</h4>
             <form method="POST">
                 {% csrf_token %}
                 {% for field in form %}
@@ -19,7 +19,7 @@
                         {% endfor %}
                     </div>
                 {% endfor %}
-                <button type="submit" class="btn btn-warning text-dark fw-bold w-100 mt-3">Log House-wise Collection</button>
+                <button type="submit" class="btn btn-warning text-dark fw-bold w-100 mt-3">{% if form.instance.pk %}Update House Collection{% else %}Log House-wise Collection{% endif %}</button>
             </form>
         </div>
     </div>

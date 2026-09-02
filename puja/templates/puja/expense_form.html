@@ -1,13 +1,13 @@
 {% extends 'puja/base.html' %}
 
-{% block title %}Log Expense - Ganesh Puja Portal{% endblock %}
-{% block page_title %}Log New Expense{% endblock %}
+{% block title %}{% if form.instance.pk %}Edit Expense{% else %}Log Expense{% endif %} - Ganesh Puja Portal{% endblock %}
+{% block page_title %}{% if form.instance.pk %}Edit Expense{% else %}Log New Expense{% endif %}{% endblock %}
 
 {% block content %}
 <div class="row justify-content-center">
     <div class="col-md-6">
         <div class="card p-4">
-            <h4 class="card-title mb-4"><i class="fa-solid fa-file-invoice-dollar text-danger me-2"></i>New Expense Form</h4>
+            <h4 class="card-title mb-4"><i class="fa-solid fa-file-invoice-dollar text-danger me-2"></i>{% if form.instance.pk %}Edit Expense Details{% else %}New Expense Form{% endif %}</h4>
             <form method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
                 {% for field in form %}
@@ -19,7 +19,7 @@
                         {% endfor %}
                     </div>
                 {% endfor %}
-                <button type="submit" class="btn btn-danger w-100 mt-3 fw-bold">Log Expense</button>
+                <button type="submit" class="btn btn-danger w-100 mt-3 fw-bold">{% if form.instance.pk %}Update Expense{% else %}Log Expense{% endif %}</button>
             </form>
         </div>
     </div>
